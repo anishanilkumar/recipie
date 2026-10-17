@@ -12,6 +12,10 @@ export function Cook() {
   const recipe = useRecipe(id);
   const [index, setIndex] = useState(0);
   const [showIngredients, setShowIngredients] = useState(false);
+  // Reading ahead without moving: the current step, its position and any
+  // running timers stay exactly as they are.
+  const [peek, setPeek] = useState(false);
+  useEffect(() => setPeek(false), [index]);
   const timers = useTimers();
   useWakeLock();
 
@@ -33,6 +37,8 @@ export function Cook() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") go(index + 1);
       if (e.key === "ArrowLeft") go(index - 1);
+      if (e.key === "ArrowDown") setPeek(true);
+      if (e.key === "ArrowUp") setPeek(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -41,6 +47,7 @@ export function Cook() {
   if (!recipe) return null;
   const d = recipe.doc;
   const step = steps[index];
+  const next = steps[index + 1];
   const base = d.servings ?? null;
   const serves = Number(params.get("serves")) || base;
   const factor = base && serves ? serves / base : 1;
@@ -81,6 +88,21 @@ export function Cook() {
             <button className="btn btn-timer" onClick={() => startTimer(step.id, `Step ${index + 1}`, step.timer_seconds!)}>
               Start {clock(step.timer_seconds)} timer
             </button>
+          ) : null}
+          {next ? (
+            <section className={`peek${peek ? " is-open" : ""}`} aria-label="Next step">
+              <button className="peek-toggle" aria-expanded={peek} onClick={() => setPeek((p) => !p)}>
+                <span className="label">Next up: step {index + 2}</span>
+                <span className="peek-line">{peek ? "Hide" : next.text}</span>
+              </button>
+              {peek ? (
+                <div className="peek-body">
+                  <p>{next.text}</p>
+                  <StepIngredients step={next} ingredients={d.ingredients} factor={factor} />
+                  {next.timer_seconds ? <span className="timer-chip">{clock(next.timer_seconds)}</span> : null}
+                </div>
+              ) : null}
+            </section>
           ) : null}
         </main>
       ) : (

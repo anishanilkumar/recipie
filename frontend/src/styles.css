@@ -737,3 +737,30 @@ ul, ol { list-style: none; }
   .cook-ings { min-height: 0; overflow-y: auto; columns: 2; column-gap: 3rem; }
   .cook-ings li { break-inside: avoid; }
 }
+
+/* ---- Peek at the next step ---------------------------------------------- */
+
+/* Read-only: no timer can be started from here, and opening it moves
+   nothing. It closes itself when the step changes. */
+.peek { border-top: var(--rule) solid var(--engrave); }
+.peek-toggle {
+  width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
+  padding: 0.75rem 0; min-height: 56px; border: 0; background: none; cursor: pointer; text-align: left;
+}
+.peek-line {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--ink-dim);
+}
+.peek.is-open .peek-line {
+  font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.08em; text-transform: uppercase; color: var(--arc);
+}
+.peek-body {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 0.875rem var(--pad); margin-bottom: 0.5rem;
+  background: var(--panel); border-left: 4px solid var(--arc-dim);
+  font-size: 1.125rem; line-height: 1.4; color: var(--ink-dim);
+}
+
+@media (min-width: 64rem) and (min-height: 40rem) {
+  .cook-step .peek { grid-column: 1; grid-row: 4; margin-top: 1rem; }
+}
