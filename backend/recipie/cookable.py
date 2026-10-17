@@ -6,7 +6,7 @@ tested against shared/cookable-cases.json; change the rules in both places
 and add a case there.
 
 Per ingredient:
-    have       linked to a Grocy product that is in stock
+    have       one of its linked Grocy products is in stock
     swap       not in stock, but one of its listed substitutes is
     missing    linked, not in stock, no substitute in stock
     untracked  not linked to Grocy, so there is nothing to check
@@ -29,19 +29,31 @@ from typing import Mapping
 MAX_PROBLEMS_FOR_ALMOST = 2
 
 
-def _in_stock(product_id, stock: Mapping[int, float]) -> bool:
-    return product_id is not None and stock.get(int(product_id), 0) > 0
+def product_ids(item: Mapping) -> list[int]:
+    """Linked Grocy products; also reads the old single `grocy_product_id`."""
+    ids = list(item.get("grocy_product_ids") or [])
+    old = item.get("grocy_product_id")
+    if old is not None and old not in ids:
+        ids.append(old)
+    return [int(i) for i in ids]
+
+
+def _any_in_stock(item: Mapping, stock: Mapping[int, float]) -> bool:
+    return any(stock.get(pid, 0) > 0 for pid in product_ids(item))
 
 
 def ingredient_state(ing: Mapping, stock: Mapping[int, float]) -> tuple[str, str | None]:
-    """Return (state, substitute name when state is 'swap')."""
-    pid = ing.get("grocy_product_id")
-    if _in_stock(pid, stock):
+    """Return (state, substitute name when state is 'swap').
+
+    Any one linked product in stock is enough: they are pack sizes of the
+    same thing.
+    """
+    if _any_in_stock(ing, stock):
         return "have", None
     for sub in ing.get("substitutes") or []:
-        if _in_stock(sub.get("grocy_product_id"), stock):
+        if _any_in_stock(sub, stock):
             return "swap", sub["name"]
-    if pid is None:
+    if not product_ids(ing):
         return "untracked", None
     return "missing", None
 

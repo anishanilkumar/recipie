@@ -9,9 +9,9 @@ CURRY = {
     "title": "Chicken curry",
     "tags": ["kerala"],
     "ingredients": [
-        {"name": "Chicken", "role": "main", "grocy_product_id": 1},
-        {"name": "Coconut oil", "role": "minor", "grocy_product_id": 2,
-         "substitutes": [{"name": "Ghee", "grocy_product_id": 3}]},
+        {"name": "Chicken", "role": "main", "grocy_product_ids": [1]},
+        {"name": "Coconut oil", "role": "minor", "grocy_product_ids": [2],
+         "substitutes": [{"name": "Ghee", "grocy_product_ids": [3]}]},
     ],
 }
 
@@ -54,3 +54,10 @@ def test_get_by_title_and_delete_restore():
 def test_find_pantry_products():
     hits = call("find_pantry_products", query="oil")
     assert hits[0]["name"] == "Coconut oil" and hits[0]["in_stock"] is False
+
+
+def test_any_pack_size_in_stock_counts():
+    # 2 (out) and 1 (in stock) both linked: the in-stock one is enough.
+    saved = call("save_recipe", recipe={"title": "Fry", "ingredients": [
+        {"name": "Chicken", "role": "main", "grocy_product_ids": [2, 1]}]})
+    assert saved["pantry_check"]["status"] == "ready"

@@ -528,3 +528,17 @@ input, textarea { font: inherit; color: inherit; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .steam { display: none; }
 }
+
+/* Linked pantry products: one chip per pack size. */
+.pantry-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pantry-links .pantry-pick { flex-basis: 100%; }
+.pantry-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 2px solid var(--line); border-radius: 10px; padding: 3px 4px 3px 10px; font-size: 0.95rem;
+}
+.pantry-links.compact .pantry-chip { font-size: 0.85rem; }
+.pantry-chip button {
+  border: 0; background: none; cursor: pointer; color: var(--steel);
+  font-size: 1.15rem; line-height: 1; width: 28px; height: 28px; border-radius: 8px;
+}
+.pantry-chip button:hover { background: var(--enamel-2); color: var(--no); }

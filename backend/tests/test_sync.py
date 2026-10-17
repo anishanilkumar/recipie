@@ -86,3 +86,23 @@ def test_pantry_snapshot(client):
     snap = client.get("/api/pantry").json()
     assert snap["stock"] == {"1": 500.0, "3": 1.0}
     assert snap["stale"] is False
+
+
+def test_old_single_id_documents_are_migrated_once(client):
+    # Written the way recipes were stored before grocy_product_ids existed.
+    import json
+    with db.write_tx() as conn:
+        conn.execute(
+            "INSERT INTO recipes (id, rev, seq, deleted, updated_at, updated_by, doc) VALUES (?, 1, 1, 0, 'x', '', ?)",
+            ("old", json.dumps({**CURRY, "ingredients": [
+                {"id": "i1", "name": "Onions", "role": "main", "grocy_product_id": 43,
+                 "substitutes": [{"name": "Red onions", "grocy_product_id": 38}]}]})),
+        )
+    db.init()
+    row = db.get("old")
+    ing = row["doc"]["ingredients"][0]
+    assert ing["grocy_product_ids"] == [43] and "grocy_product_id" not in ing
+    assert ing["substitutes"][0]["grocy_product_ids"] == [38]
+    assert row["rev"] == 2 and row["updated_by"] == "migration"
+    db.init()  # idempotent
+    assert db.get("old")["rev"] == 2

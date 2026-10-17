@@ -2,12 +2,18 @@
 
 export type Role = "main" | "minor" | "optional";
 
-export interface Substitute {
-  name: string;
+/** Every Grocy product that counts as this item, e.g. each pack size. */
+interface PantryLinks {
+  grocy_product_ids?: number[];
+  /** Recipes saved before October 2026 carry a single id. Read, never written. */
   grocy_product_id?: number | null;
 }
 
-export interface Ingredient {
+export interface Substitute extends PantryLinks {
+  name: string;
+}
+
+export interface Ingredient extends PantryLinks {
   id: string;
   name: string;
   amount?: number | null;
@@ -15,7 +21,6 @@ export interface Ingredient {
   note?: string;
   group?: string;
   role?: Role;
-  grocy_product_id?: number | null;
   substitutes?: Substitute[];
 }
 

@@ -19,7 +19,8 @@ Each ingredient has a role:
 | minor | Needed, but you can work around it (coconut oil, curry leaves) | Counts as one gap |
 | optional | Garnish, "if you have it" | Never counts |
 
-Ingredients can be linked to a [Grocy](https://grocy.info) product and list
+Ingredients can be linked to [Grocy](https://grocy.info) products (every pack
+size: "White Onions, 2 kg" and "5 kg"; any one in stock counts) and list
 substitutes (coconut oil, or ghee). Then:
 
 - **Ready (green):** nothing missing. A minor ingredient covered by a substitute

@@ -17,7 +17,7 @@ describe("shared cookable cases", () => {
 describe("reason", () => {
   it("names the blocking main ingredient", () => {
     const v = assess(
-      { ingredients: [{ id: "1", name: "Chicken", role: "main", grocy_product_id: 1 }] },
+      { ingredients: [{ id: "1", name: "Chicken", role: "main", grocy_product_ids: [1] }] },
       {},
     );
     expect(reason(v)).toBe("No chicken");
@@ -26,8 +26,8 @@ describe("reason", () => {
     const v = assess(
       {
         ingredients: [
-          { id: "1", name: "Chicken", role: "main", grocy_product_id: 1 },
-          { id: "2", name: "Coconut oil", grocy_product_id: 2 },
+          { id: "1", name: "Chicken", role: "main", grocy_product_ids: [1] },
+          { id: "2", name: "Coconut oil", grocy_product_ids: [2] },
         ],
       },
       { "1": 1 },

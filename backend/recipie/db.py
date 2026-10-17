@@ -76,6 +76,28 @@ def connect(path: str | None = None) -> sqlite3.Connection:
 def init(path: str | None = None) -> None:
     with closing(connect(path)) as conn:
         conn.executescript(SCHEMA)
+    _migrate_single_product_ids(path)
+
+
+def _migrate_single_product_ids(path: str | None) -> None:
+    """Rewrite recipes still holding one `grocy_product_id` per ingredient.
+
+    Validation already reads the old shape, but phones and Claude see the
+    stored document, so it is rewritten once, as a normal edit (rev and seq
+    bumped) that every phone picks up on its next sync. Idempotent: a document
+    without the old key is left alone, so restarts and the second process
+    starting do nothing.
+    """
+    with write_tx(path) as conn:
+        rows = conn.execute(
+            "SELECT id, doc FROM recipes WHERE doc LIKE '%\"grocy_product_id\"%'"
+        ).fetchall()
+        for r in rows:
+            doc = RecipeDoc.model_validate_json(r["doc"]).model_dump_json()
+            conn.execute(
+                "UPDATE recipes SET rev = rev + 1, seq = ?, updated_at = ?, updated_by = 'migration', doc = ? WHERE id = ?",
+                (_next_seq(conn), now_iso(), doc, r["id"]),
+            )
 
 
 @contextmanager

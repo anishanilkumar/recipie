@@ -5,7 +5,7 @@
 // Runs in the browser so the badge works offline against the last pantry
 // snapshot, and reacts instantly to edits that haven't synced yet.
 
-import type { Ingredient } from "./types";
+import type { Ingredient, Substitute } from "./types";
 
 export type Status = "ready" | "almost" | "no" | "unknown";
 export type IngredientState = "have" | "swap" | "missing" | "untracked";
@@ -24,19 +24,27 @@ export type Stock = Record<string, number> | null;
 
 const MAX_PROBLEMS_FOR_ALMOST = 2;
 
-function inStock(id: number | null | undefined, stock: Record<string, number>): boolean {
-  return id != null && (stock[String(id)] ?? 0) > 0;
+/** Linked Grocy products; also reads the old single `grocy_product_id`. */
+export function productIds(item: Pick<Substitute, "grocy_product_ids" | "grocy_product_id">): number[] {
+  const ids = [...(item.grocy_product_ids ?? [])];
+  if (item.grocy_product_id != null && !ids.includes(item.grocy_product_id)) ids.push(item.grocy_product_id);
+  return ids;
 }
 
+function anyInStock(item: Pick<Substitute, "grocy_product_ids" | "grocy_product_id">, stock: Record<string, number>): boolean {
+  return productIds(item).some((id) => (stock[String(id)] ?? 0) > 0);
+}
+
+// Any one linked product in stock is enough: they are pack sizes of the same thing.
 export function ingredientState(
-  ing: Pick<Ingredient, "grocy_product_id" | "substitutes">,
+  ing: Pick<Ingredient, "grocy_product_ids" | "grocy_product_id" | "substitutes">,
   stock: Record<string, number>,
 ): { state: IngredientState; use?: string } {
-  if (inStock(ing.grocy_product_id, stock)) return { state: "have" };
+  if (anyInStock(ing, stock)) return { state: "have" };
   for (const sub of ing.substitutes ?? []) {
-    if (inStock(sub.grocy_product_id, stock)) return { state: "swap", use: sub.name };
+    if (anyInStock(sub, stock)) return { state: "swap", use: sub.name };
   }
-  if (ing.grocy_product_id == null) return { state: "untracked" };
+  if (!productIds(ing).length) return { state: "untracked" };
   return { state: "missing" };
 }
 

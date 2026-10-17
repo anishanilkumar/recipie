@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # main:     the dish is not the dish without it (chicken in a chicken curry).
 # minor:    needed, but a cook can work around it (coconut oil, curry leaves).
@@ -23,12 +23,39 @@ def new_id() -> str:
     return uuid.uuid4().hex
 
 
-class Substitute(BaseModel):
+class _PantryLinks(BaseModel):
+    """Grocy products that count as this item.
+
+    A list because Grocy keeps each pack size as its own product ("White
+    Onions, 2 kg" and "White Onions, 5 kg"). Linking only one made the recipe
+    say "out" whenever the other size was the one in the cupboard; with all of
+    them listed, any one in stock counts.
+    """
+
+    grocy_product_ids: list[int] = Field(
+        default_factory=list, max_length=20,
+        description="Every Grocy product that counts as this item, e.g. each pack size",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _single_id(cls, data):
+        # Recipes saved before October 2026 carry one `grocy_product_id`.
+        if isinstance(data, dict) and "grocy_product_id" in data:
+            data = dict(data)
+            old = data.pop("grocy_product_id")
+            ids = list(data.get("grocy_product_ids") or [])
+            if old is not None and old not in ids:
+                ids.insert(0, old)
+            data["grocy_product_ids"] = ids
+        return data
+
+
+class Substitute(_PantryLinks):
     name: str = Field(min_length=1, max_length=120)
-    grocy_product_id: int | None = None
 
 
-class Ingredient(BaseModel):
+class Ingredient(_PantryLinks):
     id: str = Field(default_factory=new_id)
     name: str = Field(min_length=1, max_length=120)
     amount: float | None = None
@@ -36,9 +63,6 @@ class Ingredient(BaseModel):
     note: str = Field(default="", max_length=200, description="e.g. 'finely chopped'")
     group: str = Field(default="", max_length=60, description="e.g. 'For the marinade'")
     role: Role = "minor"
-    grocy_product_id: int | None = Field(
-        default=None, description="Grocy product this ingredient is checked against"
-    )
     substitutes: list[Substitute] = Field(default_factory=list, max_length=8)
 
 

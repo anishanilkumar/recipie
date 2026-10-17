@@ -6,8 +6,8 @@
 from recipie import db
 
 I = lambda name, amount=None, unit="", role="minor", pid=None, subs=(), note="", group="": {  # noqa: E731
-    "name": name, "amount": amount, "unit": unit, "role": role, "grocy_product_id": pid,
-    "substitutes": [{"name": n, "grocy_product_id": p} for n, p in subs], "note": note, "group": group,
+    "name": name, "amount": amount, "unit": unit, "role": role, "grocy_product_ids": [pid] if pid else [],
+    "substitutes": [{"name": n, "grocy_product_ids": [p]} for n, p in subs], "note": note, "group": group,
 }
 
 RECIPES = [

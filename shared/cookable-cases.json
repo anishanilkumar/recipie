@@ -1,5 +1,5 @@
 {
-  "_comment": "Run by backend/tests/test_cookable.py and frontend/src/cookable.test.ts. Product ids: 1 chicken, 2 coconut oil, 3 ghee, 4 onion, 5 curry leaves, 6 tomato, 7 paneer, 8 coriander.",
+  "_comment": "Run by backend/tests/test_cookable.py and frontend/src/cookable.test.ts. Product ids: 1 chicken, 2 coconut oil, 3 ghee, 4 onion, 5 curry leaves, 6 tomato, 7 paneer, 8 coriander, 9 white onions 2 kg, 10 white onions 5 kg, 11 potatoes organic, 12 potatoes 5 kg.",
   "cases": [
     {
       "name": "everything in stock is ready",
@@ -12,17 +12,23 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         },
         {
           "name": "Onion",
           "role": "minor",
-          "grocy_product_id": 4
+          "grocy_product_ids": [
+            4
+          ]
         }
       ],
       "expect": {
@@ -41,17 +47,23 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         },
         {
           "name": "Onion",
           "role": "minor",
-          "grocy_product_id": 4
+          "grocy_product_ids": [
+            4
+          ]
         }
       ],
       "expect": {
@@ -71,17 +83,23 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         },
         {
           "name": "Onion",
           "role": "minor",
-          "grocy_product_id": 4
+          "grocy_product_ids": [
+            4
+          ]
         }
       ],
       "expect": {
@@ -103,22 +121,30 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         },
         {
           "name": "Onion",
           "role": "minor",
-          "grocy_product_id": 4
+          "grocy_product_ids": [
+            4
+          ]
         },
         {
           "name": "Curry leaves",
           "role": "minor",
-          "grocy_product_id": 5
+          "grocy_product_ids": [
+            5
+          ]
         }
       ],
       "expect": {
@@ -142,17 +168,23 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         },
         {
           "name": "Onion",
           "role": "minor",
-          "grocy_product_id": 4
+          "grocy_product_ids": [
+            4
+          ]
         }
       ],
       "expect": {
@@ -173,12 +205,16 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         }
       ],
       "expect": {
@@ -199,17 +235,23 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2,
           "substitutes": [
             {
               "name": "Ghee",
-              "grocy_product_id": 3
+              "grocy_product_ids": [
+                3
+              ]
             }
+          ],
+          "grocy_product_ids": [
+            2
           ]
         }
       ],
@@ -236,18 +278,24 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1,
           "substitutes": [
             {
               "name": "Paneer",
-              "grocy_product_id": 7
+              "grocy_product_ids": [
+                7
+              ]
             }
+          ],
+          "grocy_product_ids": [
+            1
           ]
         },
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         }
       ],
       "expect": {
@@ -272,12 +320,16 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Coriander",
           "role": "optional",
-          "grocy_product_id": 8
+          "grocy_product_ids": [
+            8
+          ]
         }
       ],
       "expect": {
@@ -295,7 +347,9 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Salt",
@@ -325,7 +379,9 @@
         {
           "name": "Coconut oil",
           "role": "minor",
-          "grocy_product_id": 2
+          "grocy_product_ids": [
+            2
+          ]
         }
       ],
       "expect": {
@@ -348,7 +404,9 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         }
       ],
       "expect": {
@@ -366,7 +424,9 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         }
       ],
       "expect": {
@@ -384,11 +444,15 @@
         {
           "name": "Chicken",
           "role": "main",
-          "grocy_product_id": 1
+          "grocy_product_ids": [
+            1
+          ]
         },
         {
           "name": "Tomato",
-          "grocy_product_id": 6
+          "grocy_product_ids": [
+            6
+          ]
         }
       ],
       "expect": {
@@ -396,6 +460,127 @@
         "missing_main": [],
         "missing": [
           "Tomato"
+        ]
+      }
+    },
+    {
+      "name": "any one pack size in stock counts",
+      "stock": {
+        "10": 1,
+        "12": 1
+      },
+      "ingredients": [
+        {
+          "name": "Onions",
+          "role": "main",
+          "grocy_product_ids": [
+            9,
+            10
+          ]
+        },
+        {
+          "name": "Potato",
+          "role": "main",
+          "grocy_product_ids": [
+            11,
+            12
+          ]
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "problems": 0,
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "every pack size empty is missing",
+      "stock": {
+        "12": 1
+      },
+      "ingredients": [
+        {
+          "name": "Onions",
+          "role": "main",
+          "grocy_product_ids": [
+            9,
+            10
+          ]
+        },
+        {
+          "name": "Potato",
+          "role": "main",
+          "grocy_product_ids": [
+            11,
+            12
+          ]
+        }
+      ],
+      "expect": {
+        "status": "no",
+        "missing_main": [
+          "Onions"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "name": "an empty list is untracked",
+      "stock": {
+        "1": 1
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_ids": [
+            1
+          ]
+        },
+        {
+          "name": "Salt",
+          "role": "minor",
+          "grocy_product_ids": []
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "legacy single grocy_product_id still works",
+      "stock": {
+        "10": 1
+      },
+      "ingredients": [
+        {
+          "name": "Onions",
+          "role": "main",
+          "grocy_product_id": 9,
+          "grocy_product_ids": [
+            10
+          ]
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2,
+          "substitutes": [
+            {
+              "name": "Ghee",
+              "grocy_product_id": 3
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "status": "almost",
+        "missing_main": [],
+        "missing": [
+          "Coconut oil"
         ]
       }
     }

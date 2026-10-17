@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { productIds } from "../cookable";
 import { saveLocal } from "../db";
 import { usePantry, useRecipe } from "../hooks";
 import { syncSoon } from "../sync";
@@ -125,8 +126,8 @@ export function Edit() {
                 </button>
               ))}
             </div>
-            <PantryLink label="Pantry item" productId={ing.grocy_product_id ?? null}
-              onChange={(pid) => setIng(i, { grocy_product_id: pid })} suggest={ing.name} />
+            <PantryLinks ids={productIds(ing)} suggest={ing.name}
+              onChange={(ids) => setIng(i, { grocy_product_ids: ids, grocy_product_id: undefined })} />
             <Substitutes ing={ing} onChange={(subs) => setIng(i, { substitutes: subs })} />
             <div className="edit-ing-more">
               <input aria-label="Note" placeholder="Note, e.g. thinly sliced" value={ing.note ?? ""}
@@ -213,8 +214,8 @@ function Substitutes({ ing, onChange }: { ing: Ingredient; onChange: (s: Ingredi
           <span className="sub-or">or</span>
           <input aria-label="Substitute" value={s.name} placeholder="Substitute"
             onChange={(e) => onChange(subs.map((x, j) => (j === k ? { ...x, name: e.target.value } : x)))} />
-          <PantryLink label="Pantry item" productId={s.grocy_product_id ?? null} suggest={s.name} compact
-            onChange={(pid) => onChange(subs.map((x, j) => (j === k ? { ...x, grocy_product_id: pid } : x)))} />
+          <PantryLinks ids={productIds(s)} suggest={s.name} compact
+            onChange={(ids) => onChange(subs.map((x, j) => (j === k ? { ...x, grocy_product_ids: ids, grocy_product_id: undefined } : x)))} />
           <button type="button" className="row-remove" onClick={() => onChange(subs.filter((_, j) => j !== k))}>Remove</button>
         </div>
       ))}
@@ -225,11 +226,14 @@ function Substitutes({ ing, onChange }: { ing: Ingredient; onChange: (s: Ingredi
   );
 }
 
-/** Pick the Grocy product an ingredient is checked against. Works offline from the cached product list. */
-function PantryLink({ label, productId, onChange, suggest, compact }: {
-  label: string;
-  productId: number | null;
-  onChange: (id: number | null) => void;
+/**
+ * The Grocy products an ingredient is checked against. Usually one per pack
+ * size ("White Onions, 2 kg" and "5 kg"): any one in stock counts. Works
+ * offline from the cached product list.
+ */
+function PantryLinks({ ids, onChange, suggest, compact }: {
+  ids: number[];
+  onChange: (ids: number[]) => void;
   suggest: string;
   compact?: boolean;
 }) {
@@ -237,46 +241,55 @@ function PantryLink({ label, productId, onChange, suggest, compact }: {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const products = pantry?.products ?? [];
-  const linked = products.find((p) => p.id === productId);
   const stock = pantry?.stock ?? {};
+  const inStock = (id: number) => (stock[String(id)] ?? 0) > 0;
+  const nameOf = (id: number) => products.find((p) => p.id === id)?.name ?? `Pantry item #${id}`;
 
   const hits = useMemo(() => {
-    const needle = (q || suggest).trim().toLowerCase();
-    if (!needle) return [] as PantryProduct[];
-    return products.filter((p) => p.name.toLowerCase().includes(needle)).slice(0, 8);
-  }, [q, suggest, products]);
+    // "Onions" should find "White Onions, 2 kg"; "Potato" should find
+    // "Potatoes, 5 kg". Match every word, ignoring a plural s and anything
+    // after a comma in the ingredient name ("Curry leaves, fresh").
+    const source = q || suggest.split(",")[0];
+    const words = source.toLowerCase().split(/\s+/).filter(Boolean).map((w) => w.replace(/(es|s)$/, ""));
+    if (!words.length) return [] as PantryProduct[];
+    return products
+      .filter((p) => !ids.includes(p.id) && words.every((w) => p.name.toLowerCase().includes(w)))
+      .sort((a, b) => Number(inStock(b.id)) - Number(inStock(a.id)) || a.name.localeCompare(b.name))
+      .slice(0, 10);
+  }, [q, suggest, products, ids, stock]);
 
-  if (!open) {
-    return (
-      <button type="button" className={`pantry-link ${linked ? "is-linked" : ""} ${compact ? "compact" : ""}`}
-        onClick={() => setOpen(true)} aria-label={`${label}: ${linked?.name ?? "not linked"}`}>
-        {linked ? (
-          <>
-            <span className={`dot ${(stock[String(linked.id)] ?? 0) > 0 ? "dot-have" : "dot-out"}`} aria-hidden="true" />
-            {linked.name}
-          </>
-        ) : productId != null ? `Pantry item #${productId}` : "Link to pantry"}
-      </button>
-    );
-  }
   return (
-    <div className="pantry-pick">
-      <input autoFocus placeholder={suggest ? `Search, e.g. ${suggest}` : "Search the pantry"} value={q} onChange={(e) => setQ(e.target.value)} />
-      <ul>
-        {hits.map((p) => (
-          <li key={p.id}>
-            <button type="button" onClick={() => { onChange(p.id); setOpen(false); setQ(""); }}>
-              <span className={`dot ${(stock[String(p.id)] ?? 0) > 0 ? "dot-have" : "dot-out"}`} aria-hidden="true" />
-              {p.name}
-            </button>
-          </li>
-        ))}
-        {!hits.length ? <li className="pantry-none">{products.length ? "No pantry item matches." : "No pantry list yet. Sync while online first."}</li> : null}
-      </ul>
-      <div className="pantry-pick-actions">
-        {productId != null ? <button type="button" className="link-btn" onClick={() => { onChange(null); setOpen(false); }}>Unlink</button> : null}
-        <button type="button" className="link-btn" onClick={() => setOpen(false)}>Close</button>
-      </div>
+    <div className={`pantry-links ${compact ? "compact" : ""}`}>
+      {ids.map((id) => (
+        <span key={id} className="pantry-chip">
+          <span className={`dot ${inStock(id) ? "dot-have" : "dot-out"}`} aria-hidden="true" />
+          {nameOf(id)}
+          <button type="button" aria-label={`Unlink ${nameOf(id)}`} onClick={() => onChange(ids.filter((x) => x !== id))}>×</button>
+        </span>
+      ))}
+      {open ? (
+        <div className="pantry-pick">
+          <input autoFocus placeholder={suggest ? `Search, e.g. ${suggest.split(",")[0]}` : "Search the pantry"} value={q} onChange={(e) => setQ(e.target.value)} />
+          <ul>
+            {hits.map((p) => (
+              <li key={p.id}>
+                <button type="button" onClick={() => onChange([...ids, p.id])}>
+                  <span className={`dot ${inStock(p.id) ? "dot-have" : "dot-out"}`} aria-hidden="true" />
+                  {p.name}
+                </button>
+              </li>
+            ))}
+            {!hits.length ? <li className="pantry-none">{products.length ? "No other pantry item matches." : "No pantry list yet. Sync while online first."}</li> : null}
+          </ul>
+          <div className="pantry-pick-actions">
+            <button type="button" className="link-btn" onClick={() => { setOpen(false); setQ(""); }}>Done</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="pantry-link" onClick={() => setOpen(true)}>
+          {ids.length ? "Add another pack size" : "Link to pantry"}
+        </button>
+      )}
     </div>
   );
 }

@@ -36,9 +36,17 @@ Add substitutes where a real cook would swap (coconut oil -> ghee, any
 neutral oil).
 
 Link ingredients to the pantry so availability can be checked: call
-find_pantry_products and set grocy_product_id (and on substitutes). Leave
-salt, water and similar unlinked; unlinked minor ingredients are assumed to be
-in the kitchen. Always try to link main ingredients: an unlinked main
+find_pantry_products and put the matches in grocy_product_ids (substitutes
+have the same field). The pantry keeps each pack size or variety as its own
+product ("White Onions, 2 kg" and "White Onions, 5 kg"; "Potatoes, organic"
+and "Potatoes, 5 kg"), so link every product that would do for the
+ingredient, in stock or not. Any one in stock counts; linking only one makes
+the recipe say "out" whenever the other pack is the one in the cupboard. A
+genuinely different thing (red onions for white) is a substitute, not another
+link.
+
+Leave salt, water and similar unlinked; unlinked minor ingredients are assumed
+to be in the kitchen. Always try to link main ingredients: an unlinked main
 ingredient leaves the badge grey ("can't tell").
 
 To change an existing recipe, get_recipe first and send the whole recipe back
@@ -159,10 +167,12 @@ def register(mcp: FastMCP) -> FastMCP:
 
     @mcp.tool()
     def find_pantry_products(query: str) -> list[dict]:
-        """Search Grocy products by name, to link an ingredient (grocy_product_id).
+        """Search Grocy products by name, to link an ingredient (grocy_product_ids).
 
-        Includes products that are out of stock; linking to those is right, it is
-        how the badge knows they are missing.
+        Includes products that are out of stock. Link every pack size that
+        matches, in stock or not: any one in stock counts, and linking the
+        empty ones too is how the badge stays right after the next shop.
+        Search the plain word ("onion", "potato") to see every variant.
         """
         return pantry.search(query)
 
