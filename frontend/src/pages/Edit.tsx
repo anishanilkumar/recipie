@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { productIds } from "../cookable";
 import { saveLocal } from "../db";
+import { stepIngredients } from "../steps";
 import { usePantry, useRecipe } from "../hooks";
 import { syncSoon } from "../sync";
 import type { Ingredient, PantryProduct, RecipeDoc, Role, Step } from "../types";
@@ -57,12 +58,19 @@ export function Edit() {
 
   const save = async (e: { preventDefault(): void }) => {
     e.preventDefault();
+    const kept = new Set(doc.ingredients.filter((i) => i.name.trim()).map((i) => i.id));
     const clean: RecipeDoc = {
       ...doc,
       title: doc.title.trim(),
       tags: tagText.split(",").map((t) => t.trim()).filter(Boolean),
       ingredients: doc.ingredients.filter((i) => i.name.trim()).map((i) => ({ ...i, name: i.name.trim() })),
-      steps: doc.steps.filter((s) => s.text.trim()).map((s) => ({ ...s, text: s.text.trim() })),
+      steps: doc.steps.filter((s) => s.text.trim()).map((s) => ({
+        ...s,
+        text: s.text.trim(),
+        // An ingredient deleted in this edit can't stay referenced: the
+        // server rejects a step pointing at an ingredient that isn't there.
+        ingredient_ids: (s.ingredient_ids ?? []).filter((id) => kept.has(id)),
+      })),
     };
     if (!clean.title) {
       setError("Give the recipe a name.");
@@ -153,6 +161,7 @@ export function Edit() {
         {doc.steps.map((s, i) => (
           <li key={s.id}>
             <textarea rows={3} aria-label={`Step ${i + 1}`} value={s.text} onChange={(e) => setStep(i, { text: e.target.value })} />
+            <StepUses step={s} ingredients={doc.ingredients} onChange={(ids) => setStep(i, { ingredient_ids: ids })} />
             <label className="timer-field">
               <span>Timer, min</span>
               <NumText value={s.timer_seconds ? s.timer_seconds / 60 : null}
@@ -222,6 +231,40 @@ function Substitutes({ ing, onChange }: { ing: Ingredient; onChange: (s: Ingredi
       <button type="button" className="link-btn" onClick={() => onChange([...subs, { name: "" }])}>
         Add a substitute
       </button>
+    </div>
+  );
+}
+
+/**
+ * Which ingredients a step uses, as tappable chips. Until any is chosen the
+ * guess from the step's wording is shown preselected, so tapping one turns the
+ * guess into an explicit list.
+ */
+function StepUses({ step, ingredients, onChange }: {
+  step: Step;
+  ingredients: Ingredient[];
+  onChange: (ids: string[]) => void;
+}) {
+  const named = ingredients.filter((i) => i.name.trim());
+  if (!named.length) return null;
+  const { items, guessed } = stepIngredients(step, named);
+  const chosen = new Set(items.map((i) => i.id));
+  const toggle = (id: string) => {
+    const next = new Set(chosen);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onChange(named.filter((i) => next.has(i.id)).map((i) => i.id));
+  };
+  return (
+    <div className="step-uses">
+      <span className="step-uses-label">{guessed && items.length ? "Uses (guessed, tap to correct)" : "Uses"}</span>
+      <div className="step-uses-chips">
+        {named.map((i) => (
+          <button type="button" key={i.id} aria-pressed={chosen.has(i.id)} className="use-chip" onClick={() => toggle(i.id)}>
+            {i.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

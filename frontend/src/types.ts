@@ -28,6 +28,8 @@ export interface Step {
   id: string;
   text: string;
   timer_seconds?: number | null;
+  /** Ingredients this step uses; cook mode shows their measurements on the step. */
+  ingredient_ids?: string[];
 }
 
 export interface RecipeDoc {

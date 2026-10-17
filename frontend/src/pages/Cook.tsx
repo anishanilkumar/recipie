@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { StepIngredients } from "../components/StepIngredients";
 import { amount, clock, scaled } from "../format";
 import { useRecipe } from "../hooks";
 import { startTimer, stopTimer, useTimers } from "../timers";
@@ -74,6 +75,7 @@ export function Cook() {
             Step {index + 1} of {steps.length}
           </p>
           <p className="cook-text">{step.text}</p>
+          <StepIngredients step={step} ingredients={d.ingredients} factor={factor} size="lg" />
           {step.timer_seconds && !timers.some((t) => t.id === step.id) ? (
             <button className="btn btn-timer" onClick={() => startTimer(step.id, `Step ${index + 1}`, step.timer_seconds!)}>
               Start {clock(step.timer_seconds)} timer

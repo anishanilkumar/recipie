@@ -26,6 +26,12 @@ When saving, structure it for cooking: one ingredient per line with amount and
 unit; steps short enough to read from across the counter; a timer_seconds on
 any step that waits ("simmer 20 minutes" -> 1200).
 
+Give every step its ingredient_ids: the ingredients that step uses. Cook mode
+shows one step at a time with those ingredients' measurements under it, so a
+step without them leaves the cook scrolling back to the list. You may give
+ingredients short ids of your own ("onions", "oil-masala"), unique within the
+recipe, and reference those; when editing, keep the ids get_recipe returned.
+
 Give every ingredient a role. This drives the green/yellow/red badge:
 - main: the dish does not exist without it (chicken in chicken curry, rice in
   a biryani). Missing it means the recipe cannot be cooked.

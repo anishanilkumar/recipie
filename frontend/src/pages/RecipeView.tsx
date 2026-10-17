@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { assess, ingredientState, type Verdict } from "../cookable";
 import { Lid } from "../components/Lid";
+import { StepIngredients } from "../components/StepIngredients";
 import { deleteLocal } from "../db";
 import { amount, clock, minutes, scaled } from "../format";
 import { usePantry, useRecipe } from "../hooks";
@@ -120,6 +121,7 @@ export function RecipeView() {
             {d.steps.map((s) => (
               <li key={s.id}>
                 <p>{s.text}</p>
+                <StepIngredients step={s} ingredients={d.ingredients} factor={factor} />
                 {s.timer_seconds ? <span className="timer-chip">{clock(s.timer_seconds)}</span> : null}
               </li>
             ))}

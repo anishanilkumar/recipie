@@ -70,6 +70,10 @@ class Step(BaseModel):
     id: str = Field(default_factory=new_id)
     text: str = Field(min_length=1, max_length=2000)
     timer_seconds: int | None = Field(default=None, ge=1, le=24 * 3600)
+    ingredient_ids: list[str] = Field(
+        default_factory=list, max_length=50,
+        description="Ids of the ingredients this step uses; cook mode shows their measurements on the step",
+    )
 
 
 class RecipeDoc(BaseModel):
@@ -83,3 +87,16 @@ class RecipeDoc(BaseModel):
     ingredients: list[Ingredient] = Field(default_factory=list, max_length=100)
     steps: list[Step] = Field(default_factory=list, max_length=100)
     notes: str = Field(default="", max_length=5000)
+
+    @model_validator(mode="after")
+    def _references(self):
+        ids = [i.id for i in self.ingredients]
+        dupes = sorted({i for i in ids if ids.count(i) > 1})
+        if dupes:
+            raise ValueError(f"Ingredient ids must be unique within a recipe; repeated: {', '.join(dupes)}")
+        known = set(ids)
+        for n, step in enumerate(self.steps, 1):
+            unknown = [i for i in step.ingredient_ids if i not in known]
+            if unknown:
+                raise ValueError(f"Step {n} uses ingredient ids that are not in this recipe: {', '.join(unknown)}")
+        return self

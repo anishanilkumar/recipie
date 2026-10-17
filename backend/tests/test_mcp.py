@@ -61,3 +61,14 @@ def test_any_pack_size_in_stock_counts():
     saved = call("save_recipe", recipe={"title": "Fry", "ingredients": [
         {"name": "Chicken", "role": "main", "grocy_product_ids": [2, 1]}]})
     assert saved["pantry_check"]["status"] == "ready"
+
+
+def test_steps_reference_ingredients_by_id():
+    recipe = {"title": "Fry", "ingredients": [{"id": "chicken", "name": "Chicken", "role": "main", "amount": 500, "unit": "g"}],
+              "steps": [{"text": "Fry the chicken", "ingredient_ids": ["chicken"]}]}
+    saved = call("save_recipe", recipe=recipe)
+    assert call("get_recipe", id_or_title=saved["id"])["recipe"]["steps"][0]["ingredient_ids"] == ["chicken"]
+
+    bad = {**recipe, "steps": [{"text": "Fry", "ingredient_ids": ["beef"]}]}
+    with pytest.raises(Exception, match="not in this recipe: beef"):
+        call("save_recipe", recipe=bad)
