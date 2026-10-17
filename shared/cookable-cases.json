@@ -1,0 +1,403 @@
+{
+  "_comment": "Run by backend/tests/test_cookable.py and frontend/src/cookable.test.ts. Product ids: 1 chicken, 2 coconut oil, 3 ghee, 4 onion, 5 curry leaves, 6 tomato, 7 paneer, 8 coriander.",
+  "cases": [
+    {
+      "name": "everything in stock is ready",
+      "stock": {
+        "1": 500,
+        "2": 1,
+        "4": 3
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        },
+        {
+          "name": "Onion",
+          "role": "minor",
+          "grocy_product_id": 4
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "one minor missing is almost",
+      "stock": {
+        "1": 500,
+        "4": 3
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        },
+        {
+          "name": "Onion",
+          "role": "minor",
+          "grocy_product_id": 4
+        }
+      ],
+      "expect": {
+        "status": "almost",
+        "missing_main": [],
+        "missing": [
+          "Coconut oil"
+        ]
+      }
+    },
+    {
+      "name": "two minor missing is still almost",
+      "stock": {
+        "1": 500
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        },
+        {
+          "name": "Onion",
+          "role": "minor",
+          "grocy_product_id": 4
+        }
+      ],
+      "expect": {
+        "status": "almost",
+        "missing_main": [],
+        "missing": [
+          "Coconut oil",
+          "Onion"
+        ],
+        "problems": 2
+      }
+    },
+    {
+      "name": "three minor missing is not tonight",
+      "stock": {
+        "1": 500
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        },
+        {
+          "name": "Onion",
+          "role": "minor",
+          "grocy_product_id": 4
+        },
+        {
+          "name": "Curry leaves",
+          "role": "minor",
+          "grocy_product_id": 5
+        }
+      ],
+      "expect": {
+        "status": "no",
+        "missing_main": [],
+        "missing": [
+          "Coconut oil",
+          "Onion",
+          "Curry leaves"
+        ],
+        "problems": 3
+      }
+    },
+    {
+      "name": "missing main is not tonight even when everything else is there",
+      "stock": {
+        "2": 1,
+        "4": 3
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        },
+        {
+          "name": "Onion",
+          "role": "minor",
+          "grocy_product_id": 4
+        }
+      ],
+      "expect": {
+        "status": "no",
+        "missing_main": [
+          "Chicken"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "name": "zero stock counts as missing",
+      "stock": {
+        "1": 0,
+        "2": 1
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        }
+      ],
+      "expect": {
+        "status": "no",
+        "missing_main": [
+          "Chicken"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "name": "a stocked substitute covers a minor ingredient completely",
+      "stock": {
+        "1": 500,
+        "3": 1
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2,
+          "substitutes": [
+            {
+              "name": "Ghee",
+              "grocy_product_id": 3
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "missing_main": [],
+        "missing": [],
+        "swaps": [
+          {
+            "ingredient": "Coconut oil",
+            "use": "Ghee"
+          }
+        ],
+        "problems": 0
+      }
+    },
+    {
+      "name": "a substitute for the main ingredient makes it almost, not ready",
+      "stock": {
+        "7": 1,
+        "2": 1
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1,
+          "substitutes": [
+            {
+              "name": "Paneer",
+              "grocy_product_id": 7
+            }
+          ]
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        }
+      ],
+      "expect": {
+        "status": "almost",
+        "missing_main": [],
+        "missing": [],
+        "swaps": [
+          {
+            "ingredient": "Chicken",
+            "use": "Paneer"
+          }
+        ],
+        "problems": 1
+      }
+    },
+    {
+      "name": "optional ingredients never count",
+      "stock": {
+        "1": 500
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Coriander",
+          "role": "optional",
+          "grocy_product_id": 8
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "untracked minor ingredients like salt are assumed present",
+      "stock": {
+        "1": 500
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Salt",
+          "role": "minor"
+        },
+        {
+          "name": "Water",
+          "role": "minor"
+        }
+      ],
+      "expect": {
+        "status": "ready",
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "an untracked main ingredient cannot be called ready",
+      "stock": {
+        "2": 1
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main"
+        },
+        {
+          "name": "Coconut oil",
+          "role": "minor",
+          "grocy_product_id": 2
+        }
+      ],
+      "expect": {
+        "status": "unknown",
+        "missing_main": [],
+        "missing": [],
+        "untracked_main": [
+          "Chicken"
+        ]
+      }
+    },
+    {
+      "name": "a missing main still wins over an untracked main",
+      "stock": {},
+      "ingredients": [
+        {
+          "name": "Rice",
+          "role": "main"
+        },
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        }
+      ],
+      "expect": {
+        "status": "no",
+        "missing_main": [
+          "Chicken"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "name": "no pantry snapshot yet is unknown",
+      "stock": null,
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        }
+      ],
+      "expect": {
+        "status": "unknown",
+        "missing_main": [],
+        "missing": []
+      }
+    },
+    {
+      "name": "role defaults to minor",
+      "stock": {
+        "1": 500
+      },
+      "ingredients": [
+        {
+          "name": "Chicken",
+          "role": "main",
+          "grocy_product_id": 1
+        },
+        {
+          "name": "Tomato",
+          "grocy_product_id": 6
+        }
+      ],
+      "expect": {
+        "status": "almost",
+        "missing_main": [],
+        "missing": [
+          "Tomato"
+        ]
+      }
+    }
+  ]
+}

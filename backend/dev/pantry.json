@@ -1,0 +1,19 @@
+{
+  "products": [
+    {"id": 1, "name": "Chicken thighs", "unit": "g"},
+    {"id": 2, "name": "Coconut oil", "unit": "bottle"},
+    {"id": 3, "name": "Ghee", "unit": "jar"},
+    {"id": 4, "name": "Onion", "unit": "piece"},
+    {"id": 5, "name": "Curry leaves", "unit": "bunch"},
+    {"id": 6, "name": "Tomato", "unit": "piece"},
+    {"id": 7, "name": "Coconut milk", "unit": "can"},
+    {"id": 8, "name": "Basmati rice", "unit": "g"},
+    {"id": 9, "name": "Eggs", "unit": "piece"},
+    {"id": 10, "name": "Prawns", "unit": "g"},
+    {"id": 11, "name": "Ginger", "unit": "g"},
+    {"id": 12, "name": "Kashmiri chilli powder", "unit": "g"},
+    {"id": 13, "name": "Moong dal", "unit": "g"},
+    {"id": 14, "name": "Sunflower oil", "unit": "bottle"}
+  ],
+  "stock": {"1": 800, "3": 1, "4": 6, "6": 2, "7": 2, "8": 2000, "9": 10, "11": 120, "12": 200, "13": 500, "14": 1}
+}

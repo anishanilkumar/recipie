@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "recipie"
+version = "0.1.0"
+description = "Household recipe book: offline-first PWA backend, Grocy-aware, with an MCP connector for Claude"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
+    # Same bound as grocy-mcp, for the same reason: 2.x renamed FastMCP.
+    "mcp>=1.9,<2",
+    "pyjwt>=2.8",
+    "cryptography>=42",
+    # Stock reads and the OAuth token verifier come from grocy-mcp rather than
+    # a third hand-kept copy. On the server it is the clone at
+    # /home/anish/grocy_mcp on PYTHONPATH, not this pin.
+    "grocy-mcp @ git+https://github.com/anishanilkumar/grocy-mcp",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["recipie"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
