@@ -7,7 +7,6 @@ import { ago, minutes } from "../format";
 import { usePantry, useRecipes } from "../hooks";
 
 type Filter = "all" | Status;
-const FILTERS: Filter[] = ["all", "ready", "almost", "no"];
 
 export function Home() {
   const recipes = useRecipes();
@@ -46,29 +45,38 @@ export function Home() {
         <SyncPill />
       </header>
 
-      <section className="tonight" aria-labelledby="tonight-h">
-        <h2 id="tonight-h" className="tonight-q">
-          What can we cook tonight?
-        </h2>
-        <div className="filters" role="tablist" aria-label="Filter by what's in the pantry">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              role="tab"
-              aria-selected={filter === f}
-              className={`filter filter-${f}`}
-              onClick={() => choose(f)}
-            >
-              {f === "all" ? "All" : STATUS_LABEL[f]}
-              <span className="filter-count">{counts[f]}</span>
-            </button>
-          ))}
+      {/* The one number this screen exists to show, the way a Jarvis tile does:
+          how many recipes can be cooked right now. The three readouts are
+          also the filters. */}
+      <section className="instrument tonight" aria-label="What can we cook tonight">
+        <div className="tonight-top">
+          <button className={`tonight-hero filter-ready${filter === "ready" ? " is-on" : ""}`}
+            aria-pressed={filter === "ready"} onClick={() => choose(filter === "ready" ? "all" : "ready")}>
+            <span className="label">Ready tonight</span>
+            <span className="hero">{counts.ready}</span>
+          </button>
+          <div className="tonight-side">
+            {(["almost", "no"] as const).map((f) => (
+              <button key={f} className={`tonight-readout filter-${f}${filter === f ? " is-on" : ""}`}
+                aria-pressed={filter === f} onClick={() => choose(filter === f ? "all" : f)}>
+                <span className="label">{STATUS_LABEL[f]}</span>
+                <span className="readout">{counts[f]}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <p className="pantry-note">
-          {pantry?.fetched_at
-            ? `Pantry checked ${ago(pantry.fetched_at)}${pantry.stale ? ", Grocy didn't answer last time" : ""}`
-            : "Pantry not checked yet. Badges fill in after the first sync."}
-        </p>
+        <div className="tonight-foot">
+          <span className="stamp">
+            {pantry?.fetched_at
+              ? `Pantry checked ${ago(pantry.fetched_at)}${pantry.stale ? ", Grocy didn't answer" : ""}`
+              : "Pantry not checked yet"}
+          </span>
+          {filter !== "all" ? (
+            <button className="link-btn" onClick={() => choose("all")}>Show all {counts.all}</button>
+          ) : (
+            <span className="stamp">{counts.all} recipes</span>
+          )}
+        </div>
       </section>
 
       <label className="search">

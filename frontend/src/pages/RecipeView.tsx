@@ -179,23 +179,13 @@ function Verdict({ verdict }: { verdict: Verdict }) {
     <div className={`verdict verdict-${verdict.status}`} aria-live="polite">
       <span className="verdict-lid">
         <Lid verdict={verdict} size="lg" />
-        {verdict.status === "ready" ? <Steam /> : null}
       </span>
       <div>
+        <span className="label">Pantry check</span>
         <p className="verdict-head">{headline}</p>
         {detail ? <p className="verdict-detail">{detail}</p> : null}
       </div>
     </div>
-  );
-}
-
-function Steam() {
-  return (
-    <svg className="steam" viewBox="0 0 60 40" aria-hidden="true">
-      <path d="M15 38c-6-8 6-12 0-20s6-12 0-18" />
-      <path d="M30 38c-6-8 6-12 0-20s6-12 0-18" />
-      <path d="M45 38c-6-8 6-12 0-20s6-12 0-18" />
-    </svg>
   );
 }
 
