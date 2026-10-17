@@ -39,7 +39,7 @@ export function Home() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-home">
       <header className="topbar">
         <h1 className="wordmark">Recipie</h1>
         <SyncPill />

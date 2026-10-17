@@ -424,14 +424,16 @@ ul, ol { list-style: none; }
 .flag-quiet { color: var(--slate); }
 
 .steps { counter-reset: step; }
-.steps li { counter-increment: step; position: relative; padding: 0 0 1.25rem 2.75rem; }
-.steps li + li { padding-top: 1rem; border-top: var(--rule) solid var(--engrave); }
-.steps li::before {
+/* Child combinators throughout: each step holds a nested list of what it
+   needs, and a plain `.steps li` numbered those as steps too. */
+.steps > li { counter-increment: step; position: relative; padding: 0 0 1.25rem 2.75rem; }
+.steps > li + li { padding-top: 1rem; border-top: var(--rule) solid var(--engrave); }
+.steps > li::before {
   content: counter(step, decimal-leading-zero);
   position: absolute; left: 0;
   font-family: var(--face-mono); font-weight: 500; color: var(--arc);
 }
-.steps li + li::before { top: 1rem; }
+.steps > li + li::before { top: 1rem; }
 .steps p { max-width: 64ch; }
 .timer-chip { display: inline-block; margin-top: 0.5rem; font-family: var(--face-mono); font-size: var(--t-label); color: var(--gold); }
 .timer-chip::before { content: "◷ "; }
@@ -522,7 +524,9 @@ ul, ol { list-style: none; }
 }
 .edit-help { color: var(--ink-dim); max-width: 62ch; }
 
-.field { display: flex; flex-direction: column; gap: 0.375rem; flex: 1; min-width: 0; }
+.field { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+/* Only side by side do fields share the width; stacked they keep their size. */
+.field-row .field { flex: 1; }
 .field > span, .edit-ing-alt > span, .timer-field > span, .step-uses-label {
   font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim);
 }
@@ -623,3 +627,113 @@ ul, ol { list-style: none; }
 }
 
 .tonight-hero .label, .tonight-readout .label { white-space: nowrap; }
+
+/* ---- Phone: wrappers that only exist for the desktop layout ------------- */
+
+/* On a phone these dissolve and their children flow in one column, in the
+   order a cook reads them. The recipe's Edit/Delete row lives in the summary
+   column on desktop but belongs at the bottom of a phone page. */
+.recipe-side, .edit-col { display: contents; }
+.recipe-actions { order: 1; }
+
+/* ---- Desktop: one screen, no page scroll -------------------------------- */
+
+/* Same rule as the Jarvis site: on a desktop-sized window the page is the
+   viewport and never scrolls. Panels with more than fits (a long recipe list,
+   a twenty-ingredient recipe) scroll inside themselves instead. The height
+   guard matters as much as the width: a short laptop window keeps the
+   scrolling column, which is honest, rather than clipping a panel it cannot
+   fit. */
+@media (min-width: 64rem) and (min-height: 40rem) {
+  html, body { height: 100%; overflow: hidden; }
+
+  .page {
+    max-width: none;
+    height: 100dvh;
+    padding: var(--gap) calc(var(--gap) * 1.5);
+    column-gap: calc(var(--gap) * 1.5);
+  }
+
+  /* A panel that scrolls carries its brackets as background, which stays on
+     the panel's visible corners; ::before/::after would scroll away with the
+     content. */
+  .tray, .ingredients, .method {
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--engrave) transparent;
+    background:
+      linear-gradient(var(--engrave), var(--engrave)) top left / var(--bracket) var(--rule) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) top left / var(--rule) var(--bracket) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) bottom right / var(--bracket) var(--rule) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) bottom right / var(--rule) var(--bracket) no-repeat,
+      var(--panel);
+  }
+  .tray::before, .tray::after,
+  .ingredients::before, .ingredients::after,
+  .method::before, .method::after { display: none; }
+
+  /* Home: the tile and search on the left, the list takes the rest. */
+  .page-home {
+    display: grid;
+    grid-template-columns: minmax(20rem, 26rem) minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    row-gap: var(--gap);
+  }
+  .page-home .topbar { grid-column: 1 / -1; }
+  .page-home .tonight { grid-column: 1; grid-row: 2; }
+  .page-home .search { grid-column: 1; grid-row: 3; }
+  .page-home .tray,
+  .page-home .empty { grid-column: 2; grid-row: 2 / -1; align-self: stretch; }
+  .page-home .tray { padding-bottom: 5rem; } /* clear of the add button */
+
+  /* Recipe: summary, ingredients, method, side by side. */
+  .page-recipe {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(18rem, 24rem) minmax(20rem, 28rem) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .recipe-side {
+    display: flex; flex-direction: column; gap: var(--gap);
+    min-height: 0; overflow-y: auto; scrollbar-width: thin;
+  }
+  .recipe-cols { display: contents; }
+  .ingredients { position: static; align-self: stretch; }
+  .page-recipe .btn-cook { width: 100%; padding: 0 1.25rem; }
+  .recipe-actions { margin-top: auto; }
+
+  /* Edit: details, ingredients, method, each scrolling on its own. */
+  .page-edit {
+    display: grid;
+    grid-template-columns: minmax(18rem, 24rem) minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .edit-col {
+    display: flex; flex-direction: column; gap: var(--gap);
+    min-height: 0; overflow-y: auto; scrollbar-width: thin; padding-right: 0.375rem;
+  }
+  .edit-col-details { grid-column: 1; grid-row: 1; }
+  .edit-col-ings { grid-column: 2; grid-row: 1 / -1; }
+  .edit-col-method { grid-column: 3; grid-row: 1 / -1; }
+  .edit-col .edit-sub { margin-top: 0; padding-top: 0; border-top: 0; }
+  .page-edit .save-bar { grid-column: 1; grid-row: 2; position: static; background: none; padding-bottom: 0; }
+
+  /* Cook: the step on the left, what it needs on the right. */
+  .cook { height: 100dvh; max-width: 84rem; }
+  .cook-step {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    column-gap: 3rem;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .cook-count { grid-column: 1; grid-row: 1; }
+  .cook-text { grid-column: 1; grid-row: 2; }
+  .btn-timer { grid-column: 1; grid-row: 3; justify-self: start; }
+  .cook-step .step-ings-lg { grid-column: 2; grid-row: 1 / -1; align-self: center; }
+  .cook-ings { min-height: 0; overflow-y: auto; columns: 2; column-gap: 3rem; }
+  .cook-ings li { break-inside: avoid; }
+}

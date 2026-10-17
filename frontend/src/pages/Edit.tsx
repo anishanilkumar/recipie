@@ -83,6 +83,9 @@ export function Edit() {
 
   return (
     <form className="page page-edit" onSubmit={save}>
+      {/* Three columns on desktop, each scrolling on its own; on a phone the
+          wrappers dissolve (display: contents) into one column. */}
+      <div className="edit-col edit-col-details">
       <nav className="back">
         <Link to={id ? `/r/${id}` : "/"}>Cancel</Link>
       </nav>
@@ -109,7 +112,9 @@ export function Edit() {
         <span>Tags, separated by commas</span>
         <input value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="kerala, weeknight" />
       </label>
+      </div>
 
+      <div className="edit-col edit-col-ings">
       <h2 className="edit-sub">Ingredients</h2>
       <p className="edit-help">
         Main ingredients decide whether a recipe can be cooked at all. Link each one to the pantry so Recipie can check.
@@ -162,7 +167,9 @@ export function Edit() {
         onClick={() => patch({ ingredients: [...doc.ingredients, { id: newId(), name: "", role: "minor" }] })}>
         Add ingredient
       </button>
+      </div>
 
+      <div className="edit-col edit-col-method">
       <h2 className="edit-sub">Method</h2>
       <ol className="edit-list edit-steps">
         {doc.steps.map((s, i) => (
@@ -194,6 +201,7 @@ export function Edit() {
         <span>Source</span>
         <input value={doc.source ?? ""} onChange={(e) => patch({ source: e.target.value })} placeholder="Amma, or a link" />
       </label>
+      </div>
 
       <div className="save-bar">
         <button type="submit" className="btn btn-primary">Save recipe</button>

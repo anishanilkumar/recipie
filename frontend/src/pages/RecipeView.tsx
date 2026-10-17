@@ -63,6 +63,10 @@ export function RecipeView() {
 
   return (
     <div className="page page-recipe">
+      {/* The summary column on desktop. On a phone it dissolves
+          (display: contents) and its children flow in the page as before,
+          with the Edit/Delete row moved to the end by CSS order. */}
+      <aside className="recipe-side">
       <BackLink />
 
       <header className="recipe-head">
@@ -82,6 +86,14 @@ export function RecipeView() {
       <Link to={`/r/${recipe.id}/cook${serves && serves !== base ? `?serves=${serves}` : ""}`} className="btn btn-primary btn-cook">
         Start cooking
       </Link>
+
+      <footer className="recipe-actions">
+        <Link to={`/r/${recipe.id}/edit`} className="btn">Edit</Link>
+        <button className={`btn ${confirmDelete ? "btn-danger" : "btn-quiet"}`} onClick={remove}>
+          {confirmDelete ? "Tap again to delete" : "Delete"}
+        </button>
+      </footer>
+      </aside>
 
       <div className="recipe-cols">
         <section className="ingredients" aria-labelledby="ing-h">
@@ -137,12 +149,6 @@ export function RecipeView() {
         </section>
       </div>
 
-      <footer className="recipe-actions">
-        <Link to={`/r/${recipe.id}/edit`} className="btn">Edit</Link>
-        <button className={`btn ${confirmDelete ? "btn-danger" : "btn-quiet"}`} onClick={remove}>
-          {confirmDelete ? "Tap again to delete" : "Delete"}
-        </button>
-      </footer>
     </div>
   );
 }
