@@ -82,7 +82,7 @@ export function Cook() {
           <p className="cook-count">
             Step {index + 1} of {steps.length}
           </p>
-          <p className="cook-text">{step.text}</p>
+          <p className={`cook-text cook-text-${textSize(step.text)}`}>{step.text}</p>
           <StepIngredients step={step} ingredients={d.ingredients} factor={factor} size="lg" />
           {step.timer_seconds && !timers.some((t) => t.id === step.id) ? (
             <button className="btn btn-timer" onClick={() => startTimer(step.id, `Step ${index + 1}`, step.timer_seconds!)}>
@@ -142,6 +142,13 @@ export function Cook() {
       </nav>
     </div>
   );
+}
+
+/** Long steps get smaller type so a whole step still fits one screen. */
+function textSize(text: string): "short" | "medium" | "long" {
+  if (text.length > 300) return "long";
+  if (text.length > 160) return "medium";
+  return "short";
 }
 
 /** Keep the screen on while cooking. */
