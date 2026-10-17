@@ -18,6 +18,9 @@ export interface Ingredient extends PantryLinks {
   name: string;
   amount?: number | null;
   unit?: string;
+  /** The same quantity in a kitchen measure, shown alongside: "¾ tsp", "9 medium". */
+  alt_amount?: number | null;
+  alt_unit?: string;
   note?: string;
   group?: string;
   role?: Role;

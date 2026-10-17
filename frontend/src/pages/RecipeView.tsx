@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { assess, ingredientState, type Verdict } from "../cookable";
 import { Lid } from "../components/Lid";
+import { Qty } from "../components/Qty";
 import { StepIngredients } from "../components/StepIngredients";
 import { deleteLocal } from "../db";
-import { amount, clock, minutes, scaled } from "../format";
+import { clock, minutes } from "../format";
 import { usePantry, useRecipe } from "../hooks";
 import { syncSoon } from "../sync";
 import type { Ingredient } from "../types";
@@ -212,14 +213,13 @@ function IngredientRow({
   let flag: { text: string; tone: string } | null = null;
   if (st?.state === "missing") flag = { text: role === "optional" ? "out, optional" : "out", tone: role === "main" ? "no" : role === "optional" ? "quiet" : "almost" };
   else if (st?.state === "swap") flag = { text: `use ${st.use?.toLowerCase()}`, tone: "swap" };
-  const qty = [amount(scaled(ing.amount, factor)), ing.unit].filter(Boolean).join(" ");
 
   return (
     <li className={`ing ing-${role}${ticked ? " ing-ticked" : ""}`}>
       <button className="ing-tick" onClick={onToggle} aria-pressed={ticked}>
         <span className="ing-box" aria-hidden="true" />
         <span className="ing-text">
-          {qty ? <span className="ing-qty">{qty}</span> : null}
+          <Qty ing={ing} factor={factor} />
           <span className="ing-name">{ing.name}</span>
           {ing.note ? <span className="ing-note">, {ing.note}</span> : null}
           {role === "optional" ? <span className="ing-note"> (optional)</span> : null}

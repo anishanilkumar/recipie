@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { measures } from "./format";
 import { guessStepIngredients, stepIngredients } from "./steps";
 import type { Ingredient } from "./types";
 
@@ -34,5 +35,14 @@ describe("stepIngredients", () => {
   it("does not tie generic words to ingredients", () => {
     expect(names(guessStepIngredients({ id: "s", text: "Heat the oil and add the powders." }, ING))).toEqual([]);
     expect(names(guessStepIngredients({ id: "s", text: "Add turmeric." }, ING))).toEqual(["turmeric"]);
+  });
+});
+
+describe("measures", () => {
+  it("shows grams and the kitchen measure, both scaled", () => {
+    expect(measures({ amount: 70, unit: "g", alt_amount: 5, alt_unit: "tbsp" }, 1)).toEqual({ main: "70 g", alt: "5 tbsp" });
+    expect(measures({ amount: 2.5, unit: "g", alt_amount: 0.75, alt_unit: "tsp" }, 2)).toEqual({ main: "5 g", alt: "1½ tsp" });
+    expect(measures({ amount: 650, unit: "g", alt_amount: 13, alt_unit: "" }, 1)).toEqual({ main: "650 g", alt: "13" });
+    expect(measures({ amount: 10, unit: "g" }, 1)).toEqual({ main: "10 g", alt: "" });
   });
 });

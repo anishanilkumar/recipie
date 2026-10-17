@@ -125,6 +125,13 @@ export function Edit() {
               <input className="in-name" aria-label="Ingredient" placeholder="Ingredient"
                 value={ing.name} onChange={(e) => setIng(i, { name: e.target.value })} />
             </div>
+            <div className="edit-ing-alt">
+              <span>Also as</span>
+              <NumText className="in-amount" aria-label="Kitchen measure amount" placeholder="Qty"
+                value={ing.alt_amount} onValue={(v) => setIng(i, { alt_amount: v })} />
+              <input className="in-unit" aria-label="Kitchen measure unit" placeholder="tsp, tbsp, cup"
+                value={ing.alt_unit ?? ""} onChange={(e) => setIng(i, { alt_unit: e.target.value })} />
+            </div>
             <div className="roles" role="radiogroup" aria-label="How much it matters">
               {ROLES.map((r) => (
                 <button type="button" key={r.value} role="radio" title={r.hint}

@@ -46,3 +46,12 @@ export function ago(iso: string | null | undefined, now = Date.now()): string {
   const d = Math.round(h / 24);
   return d === 1 ? "yesterday" : `${d} days ago`;
 }
+
+/** "70 g" and "5 tbsp" for an ingredient, both scaled; either may be empty. */
+export function measures(
+  ing: { amount?: number | null; unit?: string; alt_amount?: number | null; alt_unit?: string },
+  factor: number,
+): { main: string; alt: string } {
+  const join = (n: number | null | undefined, unit?: string) => [amount(scaled(n, factor)), n != null ? unit : ""].filter(Boolean).join(" ");
+  return { main: join(ing.amount, ing.unit), alt: join(ing.alt_amount, ing.alt_unit) };
+}

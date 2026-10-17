@@ -567,3 +567,9 @@ input, textarea { font: inherit; color: inherit; }
   padding: 4px 12px; font-size: 0.9rem; cursor: pointer; color: var(--steel);
 }
 .use-chip[aria-pressed="true"] { border-color: var(--rim); background: var(--rim); color: var(--rim-ink); }
+
+/* The kitchen measure next to the weight: same line, quieter. */
+.qty-alt { font-weight: 400; color: var(--steel); }
+.step-ings-lg .qty-alt { color: var(--steel); }
+.edit-ing-alt { display: grid; grid-template-columns: auto 4.5rem 1fr; gap: 6px; align-items: center; }
+.edit-ing-alt > span { font-size: 0.9rem; font-weight: 700; color: var(--steel); padding-right: 4px; }

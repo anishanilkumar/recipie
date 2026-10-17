@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Qty } from "../components/Qty";
 import { StepIngredients } from "../components/StepIngredients";
-import { amount, clock, scaled } from "../format";
+import { clock } from "../format";
 import { useRecipe } from "../hooks";
 import { startTimer, stopTimer, useTimers } from "../timers";
 
@@ -64,7 +65,7 @@ export function Cook() {
         <ul className="cook-ings">
           {d.ingredients.map((i) => (
             <li key={i.id}>
-              <span className="ing-qty">{[amount(scaled(i.amount, factor)), i.unit].filter(Boolean).join(" ")}</span> {i.name}
+              <Qty ing={i} factor={factor} /> {i.name}
               {i.note ? <span className="ing-note">, {i.note}</span> : null}
             </li>
           ))}

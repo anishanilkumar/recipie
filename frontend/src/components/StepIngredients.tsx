@@ -1,4 +1,4 @@
-import { amount, scaled } from "../format";
+import { Qty } from "./Qty";
 import { stepIngredients } from "../steps";
 import type { Ingredient, Step } from "../types";
 
@@ -14,10 +14,9 @@ export function StepIngredients({ step, ingredients, factor, size = "md" }: {
   return (
     <ul className={`step-ings step-ings-${size}`} aria-label="For this step">
       {items.map((i) => {
-        const qty = [amount(scaled(i.amount, factor)), i.unit].filter(Boolean).join(" ");
         return (
           <li key={i.id}>
-            {qty ? <span className="step-ing-qty">{qty}</span> : null}
+            <Qty ing={i} factor={factor} className="step-ing-qty" />
             <span className="step-ing-name">{i.name}</span>
           </li>
         );

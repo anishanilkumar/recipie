@@ -60,6 +60,10 @@ class Ingredient(_PantryLinks):
     name: str = Field(min_length=1, max_length=120)
     amount: float | None = None
     unit: str = Field(default="", max_length=40)
+    # The same quantity in a second measure, shown alongside: grams in
+    # `amount`, and here what you'd scoop or count ("¾ tsp", "9 medium").
+    alt_amount: float | None = None
+    alt_unit: str = Field(default="", max_length=40)
     note: str = Field(default="", max_length=200, description="e.g. 'finely chopped'")
     group: str = Field(default="", max_length=60, description="e.g. 'For the marinade'")
     role: Role = "minor"
