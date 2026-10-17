@@ -1,14 +1,25 @@
 import { useEffect, useState } from "react";
 import { ago } from "../format";
+import { useMe } from "../hooks";
 import { syncNow, useSyncState } from "../sync";
 
 export function SyncPill() {
   const s = useSyncState();
+  const me = useMe();
   const [, tick] = useState(0);
   useEffect(() => {
     const t = setInterval(() => tick((n) => n + 1), 30_000);
     return () => clearInterval(t);
   }, []);
+
+  if (me?.demo) {
+    return (
+      <span className="pill pill-demo" title="Nothing you change is sent anywhere">
+        <span className="pill-dot pill-dot-demo" aria-hidden="true" />
+        Demo
+      </span>
+    );
+  }
 
   if (s.phase === "signed-out") {
     return (

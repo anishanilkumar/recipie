@@ -15,6 +15,19 @@ describe("shared cookable cases", () => {
 });
 
 describe("reason", () => {
+  it("names only the gaps when something is missing, not the covered swaps", () => {
+    const v = assess(
+      {
+        ingredients: [
+          { id: "1", name: "Moong dal", role: "main", grocy_product_ids: [1] },
+          { id: "2", name: "Grated coconut", grocy_product_ids: [2] },
+          { id: "3", name: "Curry leaves, fresh", grocy_product_ids: [3], substitutes: [{ name: "Curry leaves, dried", grocy_product_ids: [4] }] },
+        ],
+      },
+      { "1": 1, "4": 1 },
+    );
+    expect(reason(v)).toBe("No grated coconut");
+  });
   it("names the blocking main ingredient", () => {
     const v = assess(
       { ingredients: [{ id: "1", name: "Chicken", role: "main", grocy_product_ids: [1] }] },

@@ -29,6 +29,8 @@ echo "==> Building the PWA"
 echo "==> Uploading"
 ssh "$target" "mkdir -p '$DEPLOY_APP_DIR/backend'"
 rsync -az --delete --exclude '__pycache__' backend/recipie/ "$target:$DEPLOY_APP_DIR/backend/recipie/"
+# The public demo's made-up pantry and sample recipes (recipie-demo unit).
+rsync -az --delete backend/demo/ "$target:$DEPLOY_APP_DIR/backend/demo/"
 # Hashed assets: upload the new ones first, swap index.html and the service
 # worker last, then prune. A phone mid-load never gets an index.html that
 # points at files not uploaded yet.
@@ -37,5 +39,8 @@ rsync -az frontend/dist/index.html frontend/dist/sw.js "$target:$DEPLOY_WEB_DIR/
 rsync -az --delete frontend/dist/ "$target:$DEPLOY_WEB_DIR/"
 
 echo "==> Restarting"
-ssh "$target" "sudo systemctl restart recipie-web recipie-mcp && systemctl is-active recipie-web recipie-mcp"
+# The demo reseeds itself on every start. It is restarted only where the
+# NixOS config already declares it.
+ssh "$target" 'sudo systemctl restart recipie-web recipie-mcp && systemctl is-active recipie-web recipie-mcp
+  if systemctl cat recipie-demo >/dev/null 2>&1; then sudo systemctl restart recipie-demo && systemctl is-active recipie-demo; fi'
 echo "Deployed."

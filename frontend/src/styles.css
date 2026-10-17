@@ -794,3 +794,21 @@ ul, ol { list-style: none; }
   .cook-nav .btn { min-height: 52px; }
   .btn-timer { min-height: 46px; }
 }
+
+/* ---- Public demo -------------------------------------------------------- */
+
+.pill-demo { cursor: default; color: var(--gold); }
+.pill-dot-demo { background: var(--gold); }
+.demo-note {
+  border-left: 4px solid var(--gold); background: var(--panel);
+  padding: 0.75rem var(--pad); color: var(--ink-dim); font-size: 0.9375rem; max-width: 72ch;
+}
+.demo-note a { color: var(--arc); white-space: nowrap; }
+@media (min-width: 64rem) and (min-height: 40rem) {
+  .page-home .demo-note { grid-column: 1 / -1; }
+  .page-home:has(.demo-note) { grid-template-rows: auto auto auto auto minmax(0, 1fr); }
+  .page-home:has(.demo-note) .tonight { grid-row: 3; }
+  .page-home:has(.demo-note) .search { grid-row: 4; }
+  .page-home:has(.demo-note) .tray,
+  .page-home:has(.demo-note) .empty { grid-row: 3 / -1; }
+}

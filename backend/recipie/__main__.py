@@ -1,4 +1,4 @@
-"""python -m recipie web [--port 8770]   |   python -m recipie mcp [--port 8771]"""
+"""python -m recipie web [--port 8770]  |  mcp [--port 8771]  |  demo-seed RECIPES.json"""
 
 from __future__ import annotations
 
@@ -9,9 +9,14 @@ import sys
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    if len(sys.argv) < 2 or sys.argv[1] not in ("web", "mcp"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("web", "mcp", "demo-seed"):
         sys.exit(__doc__)
     cmd, rest = sys.argv[1], sys.argv[2:]
+    if cmd == "demo-seed":
+        from .demo import seed
+
+        seed(rest[0])
+        return
     if cmd == "mcp":
         from .mcp_server import main as mcp_main
 

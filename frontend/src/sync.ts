@@ -187,6 +187,7 @@ async function runOnce(): Promise<void> {
     if (await push()) await push();
     await pull();
     await refreshPantry();
+    await setKV("me", await api<{ username: string; demo: boolean }>("/api/me"));
     const now = new Date().toISOString();
     await setKV("lastSyncedAt", now);
     set({ phase: "idle", lastSyncedAt: now, message: undefined });

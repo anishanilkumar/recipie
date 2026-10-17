@@ -1,0 +1,244 @@
+{
+ "_comment": "The public demo's made-up pantry. Never the real one: the demo server has no Grocy key at all.",
+ "products": [
+  {
+   "id": 1,
+   "name": "Chicken thighs, 1 kg",
+   "unit": "pack"
+  },
+  {
+   "id": 2,
+   "name": "Chicken thighs, 500 g",
+   "unit": "pack"
+  },
+  {
+   "id": 3,
+   "name": "Coconut oil",
+   "unit": "bottle"
+  },
+  {
+   "id": 4,
+   "name": "Ghee",
+   "unit": "jar"
+  },
+  {
+   "id": 5,
+   "name": "Sunflower oil",
+   "unit": "bottle"
+  },
+  {
+   "id": 6,
+   "name": "Onions, 2 kg",
+   "unit": "bag"
+  },
+  {
+   "id": 7,
+   "name": "Onions, 5 kg",
+   "unit": "bag"
+  },
+  {
+   "id": 8,
+   "name": "Shallots",
+   "unit": "g"
+  },
+  {
+   "id": 9,
+   "name": "Tomatoes",
+   "unit": "piece"
+  },
+  {
+   "id": 10,
+   "name": "Ginger",
+   "unit": "g"
+  },
+  {
+   "id": 11,
+   "name": "Garlic",
+   "unit": "bulb"
+  },
+  {
+   "id": 12,
+   "name": "Green chillies",
+   "unit": "g"
+  },
+  {
+   "id": 13,
+   "name": "Curry leaves, fresh",
+   "unit": "bunch"
+  },
+  {
+   "id": 14,
+   "name": "Curry leaves, dried",
+   "unit": "pack"
+  },
+  {
+   "id": 15,
+   "name": "Coconut milk, 400 ml",
+   "unit": "can"
+  },
+  {
+   "id": 16,
+   "name": "Grated coconut, frozen",
+   "unit": "pack"
+  },
+  {
+   "id": 17,
+   "name": "Basmati rice",
+   "unit": "g"
+  },
+  {
+   "id": 18,
+   "name": "Matta rice",
+   "unit": "g"
+  },
+  {
+   "id": 19,
+   "name": "Eggs, 10 pack",
+   "unit": "pack"
+  },
+  {
+   "id": 20,
+   "name": "Prawns, frozen",
+   "unit": "pack"
+  },
+  {
+   "id": 22,
+   "name": "Toor dal",
+   "unit": "g"
+  },
+  {
+   "id": 23,
+   "name": "Moong dal",
+   "unit": "g"
+  },
+  {
+   "id": 24,
+   "name": "Turmeric powder",
+   "unit": "g"
+  },
+  {
+   "id": 25,
+   "name": "Kashmiri chilli powder",
+   "unit": "g"
+  },
+  {
+   "id": 26,
+   "name": "Coriander powder",
+   "unit": "g"
+  },
+  {
+   "id": 27,
+   "name": "Garam masala",
+   "unit": "g"
+  },
+  {
+   "id": 28,
+   "name": "Black pepper, whole",
+   "unit": "g"
+  },
+  {
+   "id": 29,
+   "name": "Mustard seeds",
+   "unit": "g"
+  },
+  {
+   "id": 30,
+   "name": "Cumin seeds",
+   "unit": "g"
+  },
+  {
+   "id": 31,
+   "name": "Tamarind",
+   "unit": "g"
+  },
+  {
+   "id": 33,
+   "name": "Potatoes, 5 kg",
+   "unit": "bag"
+  },
+  {
+   "id": 34,
+   "name": "Carrots",
+   "unit": "g"
+  },
+  {
+   "id": 35,
+   "name": "Green beans",
+   "unit": "g"
+  },
+  {
+   "id": 36,
+   "name": "Plain flour",
+   "unit": "g"
+  },
+  {
+   "id": 39,
+   "name": "Sugar",
+   "unit": "g"
+  },
+  {
+   "id": 42,
+   "name": "Cardamom",
+   "unit": "g"
+  },
+  {
+   "id": 44,
+   "name": "Semiya (vermicelli)",
+   "unit": "pack"
+  },
+  {
+   "id": 45,
+   "name": "Milk",
+   "unit": "l"
+  },
+  {
+   "id": 46,
+   "name": "Cashews",
+   "unit": "g"
+  },
+  {
+   "id": 47,
+   "name": "Raisins",
+   "unit": "g"
+  },
+  {
+   "id": 48,
+   "name": "Lemons",
+   "unit": "piece"
+  }
+ ],
+ "stock": {
+  "1": 1,
+  "4": 1,
+  "5": 1,
+  "7": 1,
+  "8": 250,
+  "9": 4,
+  "10": 120,
+  "11": 2,
+  "12": 80,
+  "14": 1,
+  "15": 3,
+  "17": 2000,
+  "18": 1500,
+  "19": 1,
+  "22": 800,
+  "23": 500,
+  "24": 90,
+  "25": 150,
+  "26": 200,
+  "27": 60,
+  "28": 50,
+  "29": 100,
+  "30": 80,
+  "33": 1,
+  "34": 500,
+  "36": 1000,
+  "39": 900,
+  "42": 20,
+  "44": 2,
+  "45": 2,
+  "46": 150,
+  "48": 2
+ }
+}

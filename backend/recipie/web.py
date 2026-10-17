@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, ValidationError
 
 from . import auth_web, db, pantry
+from .config import settings
 from .models import RecipeDoc
 
 log = logging.getLogger(__name__)
@@ -36,6 +37,26 @@ class PushBody(BaseModel):
     changes: list[PushChange] = Field(max_length=500)
 
 
+def _echo(ch: PushChange) -> dict:
+    """The demo's answer to a push: accepted, and not stored.
+
+    The visitor's browser keeps the edit as if it had synced, so the app
+    behaves normally on their device, but the shared database only ever holds
+    the seeded recipes. Nothing a stranger types is shown to anyone else, and
+    the demo can't be emptied or defaced.
+    """
+    if ch.deleted:
+        return {"id": ch.id, "status": "ok", "row": None}
+    try:
+        doc = RecipeDoc.model_validate(ch.doc or {})
+    except ValidationError as e:
+        return {"id": ch.id, "status": "invalid", "error": e.errors(include_url=False)}
+    return {"id": ch.id, "status": "ok", "row": {
+        "id": ch.id, "rev": ch.base_rev + 1, "seq": 0, "deleted": False,
+        "updated_at": db.now_iso(), "updated_by": "you", "doc": doc.model_dump(),
+    }}
+
+
 def create_app() -> FastAPI:
     db.init()
     app = FastAPI(title="Recipie", docs_url=None, redoc_url=None, openapi_url=None)
@@ -47,7 +68,7 @@ def create_app() -> FastAPI:
 
     @app.get("/api/me")
     def me(user: str = Depends(require_user)):
-        return {"username": user}
+        return {"username": user, "demo": settings().demo}
 
     @app.get("/api/sync")
     def pull(since: int = 0, user: str = Depends(require_user)):
@@ -56,6 +77,8 @@ def create_app() -> FastAPI:
 
     @app.post("/api/sync")
     def push(body: PushBody, user: str = Depends(require_user)):
+        if settings().demo:
+            return {"results": [_echo(ch) for ch in body.changes]}
         results = []
         for ch in body.changes:
             try:

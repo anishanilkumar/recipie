@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { assess, type Verdict } from "./cookable";
-import { db, getPantry } from "./db";
+import { db, getKV, getPantry } from "./db";
 import type { LocalRecipe, PantrySnapshot } from "./types";
 
 export function usePantry(): PantrySnapshot | undefined {
@@ -27,4 +27,9 @@ export function useRecipes(): RecipeWithVerdict[] | undefined {
 
 export function useRecipe(id: string | undefined): LocalRecipe | null | undefined {
   return useLiveQuery(async () => (id ? ((await db.recipes.get(id)) ?? null) : null), [id]);
+}
+
+/** Who the server says we are; `demo` is true on the public demo. */
+export function useMe(): { username: string; demo: boolean } | undefined {
+  return useLiveQuery(() => getKV<{ username: string; demo: boolean }>("me"), []);
 }

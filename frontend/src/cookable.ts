@@ -87,13 +87,12 @@ export function reason(v: Verdict): string {
       return v.swaps.length
         ? `Everything's in. Use ${lower(v.swaps[0].use)} for the ${lower(v.swaps[0].ingredient)}`
         : "Everything's in";
-    case "almost": {
-      const parts = [
-        ...v.missing.map((m) => `no ${lower(m)}`),
-        ...v.swaps.map((s) => `${lower(s.use)} for ${lower(s.ingredient)}`),
-      ];
-      return capitalise(parts.join(", "));
-    }
+    case "almost":
+      // Name the gaps the number counts. A swap that fully covers a minor
+      // ingredient isn't one, so it only shows when nothing is missing (then
+      // the gap is a main ingredient covered by its substitute).
+      if (v.missing.length) return `No ${lower(listOf(v.missing))}`;
+      return capitalise(v.swaps.map((s) => `${lower(s.use)} for ${lower(s.ingredient)}`).join(", "));
     case "no":
       if (v.missing_main.length) return `No ${lower(listOf(v.missing_main))}`;
       return `${v.missing.length} things missing`;

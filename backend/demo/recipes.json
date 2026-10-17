@@ -1,0 +1,1891 @@
+{
+ "_comment": "The public demo's recipes. Loaded by `python -m recipie demo-seed` on every start of the demo server.",
+ "recipes": [
+  {
+   "id": "nadan-chicken-curry",
+   "recipe": {
+    "title": "Nadan chicken curry",
+    "servings": 4,
+    "prep_minutes": 20,
+    "cook_minutes": 45,
+    "tags": [
+     "kerala",
+     "weeknight"
+    ],
+    "source": "Recipie demo",
+    "description": "Home-style Kerala chicken curry: onions fried deep golden, roasted spices, finished with coconut milk.",
+    "ingredients": [
+     {
+      "id": "chicken",
+      "name": "Chicken thighs, bone-in",
+      "amount": 800,
+      "unit": "g",
+      "alt_amount": 8,
+      "alt_unit": "pieces",
+      "role": "main",
+      "grocy_product_ids": [
+       1,
+       2
+      ],
+      "substitutes": [],
+      "note": "cut into curry pieces",
+      "group": ""
+     },
+     {
+      "id": "oil",
+      "name": "Coconut oil",
+      "amount": 40,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       3
+      ],
+      "substitutes": [
+       {
+        "name": "Ghee",
+        "grocy_product_ids": [
+         4
+        ]
+       },
+       {
+        "name": "Sunflower oil",
+        "grocy_product_ids": [
+         5
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "mustard",
+      "name": "Mustard seeds",
+      "amount": 3,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       29
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "sprigs",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "onions",
+      "name": "Onions",
+      "amount": 300,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       6,
+       7
+      ],
+      "substitutes": [],
+      "note": "thinly sliced",
+      "group": ""
+     },
+     {
+      "id": "ginger",
+      "name": "Ginger",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       10
+      ],
+      "substitutes": [],
+      "note": "crushed",
+      "group": ""
+     },
+     {
+      "id": "garlic",
+      "name": "Garlic",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 5,
+      "alt_unit": "cloves",
+      "role": "minor",
+      "grocy_product_ids": [
+       11
+      ],
+      "substitutes": [],
+      "note": "crushed",
+      "group": ""
+     },
+     {
+      "id": "chilli",
+      "name": "Green chillies",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       12
+      ],
+      "substitutes": [],
+      "note": "slit",
+      "group": ""
+     },
+     {
+      "id": "tomato",
+      "name": "Tomato",
+      "amount": 120,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       9
+      ],
+      "substitutes": [],
+      "note": "chopped",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "kashmiri",
+      "name": "Kashmiri chilli powder",
+      "amount": 6,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       25
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "coriander",
+      "name": "Coriander powder",
+      "amount": 8,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       26
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "garam",
+      "name": "Garam masala",
+      "amount": 3,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       27
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "milk",
+      "name": "Coconut milk",
+      "amount": 200,
+      "unit": "ml",
+      "alt_amount": 0.5,
+      "alt_unit": "can",
+      "role": "minor",
+      "grocy_product_ids": [
+       15
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 6,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Heat the oil, splutter the mustard seeds, then add the curry leaves.",
+      "ingredient_ids": [
+       "oil",
+       "mustard",
+       "curry"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Add the onions with a pinch of salt and fry, stirring often, until deep golden.",
+      "ingredient_ids": [
+       "onions",
+       "salt"
+      ],
+      "timer_seconds": 720
+     },
+     {
+      "text": "Stir in ginger, garlic and green chillies for a minute. Lower the heat, add the powders and stir until fragrant.",
+      "ingredient_ids": [
+       "ginger",
+       "garlic",
+       "chilli",
+       "turmeric",
+       "kashmiri",
+       "coriander",
+       "garam"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Add the tomato and cook until it melts into the masala.",
+      "ingredient_ids": [
+       "tomato"
+      ],
+      "timer_seconds": 300
+     },
+     {
+      "text": "Add the chicken, coat it well, cover and cook on medium, stirring now and then.",
+      "ingredient_ids": [
+       "chicken"
+      ],
+      "timer_seconds": 1200
+     },
+     {
+      "text": "Pour in the coconut milk, bring just to a simmer and switch off. Rest before serving.",
+      "ingredient_ids": [
+       "milk"
+      ],
+      "timer_seconds": 600
+     }
+    ],
+    "notes": "Out of coconut oil? Ghee or sunflower oil both work; the app suggests whichever is in the pantry."
+   }
+  },
+  {
+   "id": "egg-roast",
+   "recipe": {
+    "title": "Egg roast",
+    "servings": 3,
+    "cook_minutes": 30,
+    "tags": [
+     "kerala",
+     "eggs"
+    ],
+    "source": "Recipie demo",
+    "description": "Boiled eggs in a slow-cooked, jammy onion masala. Good with appam or parotta.",
+    "ingredients": [
+     {
+      "id": "eggs",
+      "name": "Eggs",
+      "amount": 300,
+      "unit": "g",
+      "alt_amount": 6,
+      "alt_unit": "",
+      "role": "main",
+      "grocy_product_ids": [
+       19
+      ],
+      "substitutes": [],
+      "note": "hard-boiled and peeled",
+      "group": ""
+     },
+     {
+      "id": "oil",
+      "name": "Coconut oil",
+      "amount": 30,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       3
+      ],
+      "substitutes": [
+       {
+        "name": "Sunflower oil",
+        "grocy_product_ids": [
+         5
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "sprig",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "onions",
+      "name": "Onions",
+      "amount": 450,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "large",
+      "role": "minor",
+      "grocy_product_ids": [
+       6,
+       7
+      ],
+      "substitutes": [],
+      "note": "thinly sliced",
+      "group": ""
+     },
+     {
+      "id": "ginger",
+      "name": "Ginger",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       10
+      ],
+      "substitutes": [],
+      "note": "grated",
+      "group": ""
+     },
+     {
+      "id": "garlic",
+      "name": "Garlic",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "cloves",
+      "role": "minor",
+      "grocy_product_ids": [
+       11
+      ],
+      "substitutes": [],
+      "note": "grated",
+      "group": ""
+     },
+     {
+      "id": "chilli",
+      "name": "Green chillies",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       12
+      ],
+      "substitutes": [],
+      "note": "slit",
+      "group": ""
+     },
+     {
+      "id": "kashmiri",
+      "name": "Kashmiri chilli powder",
+      "amount": 5,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       25
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "coriander",
+      "name": "Coriander powder",
+      "amount": 4,
+      "unit": "g",
+      "alt_amount": 1.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       26
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "garam",
+      "name": "Garam masala",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       27
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "tomato",
+      "name": "Tomato",
+      "amount": 120,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       9
+      ],
+      "substitutes": [],
+      "note": "chopped",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 4,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Score the boiled eggs lightly so the masala gets in.",
+      "ingredient_ids": [
+       "eggs"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Heat the oil, add the curry leaves, then the onions with a pinch of salt. Fry slowly until soft and jammy.",
+      "ingredient_ids": [
+       "oil",
+       "curry",
+       "onions",
+       "salt"
+      ],
+      "timer_seconds": 900
+     },
+     {
+      "text": "Add ginger, garlic and green chillies and cook for a minute. Add the powders and fry on low until the oil separates.",
+      "ingredient_ids": [
+       "ginger",
+       "garlic",
+       "chilli",
+       "kashmiri",
+       "coriander",
+       "turmeric",
+       "garam"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Add the tomato and cook it down. Add the eggs with a splash of water, coat them and simmer.",
+      "ingredient_ids": [
+       "tomato",
+       "eggs"
+      ],
+      "timer_seconds": 300
+     }
+    ]
+   }
+  },
+  {
+   "id": "ghee-rice",
+   "recipe": {
+    "title": "Ghee rice",
+    "servings": 4,
+    "prep_minutes": 20,
+    "cook_minutes": 25,
+    "tags": [
+     "kerala",
+     "rice"
+    ],
+    "source": "Recipie demo",
+    "description": "Fragrant basmati cooked in ghee, topped with crisp onions, cashews and raisins.",
+    "ingredients": [
+     {
+      "id": "rice",
+      "name": "Basmati rice",
+      "amount": 300,
+      "unit": "g",
+      "alt_amount": 1.5,
+      "alt_unit": "cups",
+      "role": "main",
+      "grocy_product_ids": [
+       17
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "ghee",
+      "name": "Ghee",
+      "amount": 45,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "tbsp",
+      "role": "main",
+      "grocy_product_ids": [
+       4
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "onion",
+      "name": "Onion",
+      "amount": 150,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       6,
+       7
+      ],
+      "substitutes": [],
+      "note": "thinly sliced",
+      "group": ""
+     },
+     {
+      "id": "cardamom",
+      "name": "Cardamom",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "pods",
+      "role": "minor",
+      "grocy_product_ids": [
+       42
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "cashews",
+      "name": "Cashews",
+      "amount": 20,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tbsp",
+      "role": "optional",
+      "grocy_product_ids": [
+       46
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "raisins",
+      "name": "Raisins",
+      "amount": 20,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tbsp",
+      "role": "optional",
+      "grocy_product_ids": [
+       47
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "water",
+      "name": "Water, boiling",
+      "amount": 600,
+      "unit": "ml",
+      "alt_amount": 2.5,
+      "alt_unit": "cups",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 5,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Rinse the rice until the water runs clear, then soak it and drain.",
+      "ingredient_ids": [
+       "rice"
+      ],
+      "timer_seconds": 1200
+     },
+     {
+      "text": "Fry the cashews and raisins in a spoon of the ghee until golden and set aside. Fry the onion in the same pan until crisp.",
+      "ingredient_ids": [
+       "ghee",
+       "cashews",
+       "raisins",
+       "onion"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Add the rest of the ghee and the cardamom, then the rice. Stir gently for two minutes.",
+      "ingredient_ids": [
+       "ghee",
+       "cardamom",
+       "rice"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Add the boiling water and salt, cover and cook on the lowest heat.",
+      "ingredient_ids": [
+       "water",
+       "salt"
+      ],
+      "timer_seconds": 720
+     },
+     {
+      "text": "Rest, fluff with a fork, and top with the onion, cashews and raisins.",
+      "ingredient_ids": [],
+      "timer_seconds": 300
+     }
+    ],
+    "notes": "Raisins are optional, so being out of them doesn't stop the recipe going green."
+   }
+  },
+  {
+   "id": "semiya-payasam",
+   "recipe": {
+    "title": "Semiya payasam",
+    "servings": 4,
+    "cook_minutes": 25,
+    "tags": [
+     "kerala",
+     "dessert"
+    ],
+    "source": "Recipie demo",
+    "description": "Roasted vermicelli simmered in milk with cardamom. The quick payasam.",
+    "ingredients": [
+     {
+      "id": "semiya",
+      "name": "Semiya (vermicelli)",
+      "amount": 75,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "cup",
+      "role": "main",
+      "grocy_product_ids": [
+       44
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "milk",
+      "name": "Milk",
+      "amount": 1000,
+      "unit": "ml",
+      "alt_amount": 4,
+      "alt_unit": "cups",
+      "role": "main",
+      "grocy_product_ids": [
+       45
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "sugar",
+      "name": "Sugar",
+      "amount": 100,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "cup",
+      "role": "minor",
+      "grocy_product_ids": [
+       39
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "ghee",
+      "name": "Ghee",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       4
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "cardamom",
+      "name": "Cardamom",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "pods",
+      "role": "minor",
+      "grocy_product_ids": [
+       42
+      ],
+      "substitutes": [],
+      "note": "crushed",
+      "group": ""
+     },
+     {
+      "id": "cashews",
+      "name": "Cashews",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 10,
+      "alt_unit": "",
+      "role": "optional",
+      "grocy_product_ids": [
+       46
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "raisins",
+      "name": "Raisins",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "optional",
+      "grocy_product_ids": [
+       47
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Fry the cashews and raisins in the ghee until golden and set aside.",
+      "ingredient_ids": [
+       "ghee",
+       "cashews",
+       "raisins"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Roast the semiya in the same ghee until golden.",
+      "ingredient_ids": [
+       "semiya"
+      ],
+      "timer_seconds": 180
+     },
+     {
+      "text": "Add the milk and simmer, stirring, until the semiya is soft and the milk has thickened.",
+      "ingredient_ids": [
+       "milk"
+      ],
+      "timer_seconds": 900
+     },
+     {
+      "text": "Stir in the sugar and cardamom, then the cashews and raisins.",
+      "ingredient_ids": [
+       "sugar",
+       "cardamom",
+       "cashews",
+       "raisins"
+      ],
+      "timer_seconds": null
+     }
+    ]
+   }
+  },
+  {
+   "id": "kerala-parippu",
+   "recipe": {
+    "title": "Kerala parippu",
+    "servings": 4,
+    "cook_minutes": 30,
+    "tags": [
+     "kerala",
+     "sadya",
+     "vegetarian"
+    ],
+    "source": "Recipie demo",
+    "description": "Moong dal with ground coconut and a ghee tempering. The first course of a sadya.",
+    "ingredients": [
+     {
+      "id": "dal",
+      "name": "Moong dal",
+      "amount": 150,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "cup",
+      "role": "main",
+      "grocy_product_ids": [
+       23
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "coconut",
+      "name": "Grated coconut",
+      "amount": 60,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "cup",
+      "role": "minor",
+      "grocy_product_ids": [
+       16
+      ],
+      "substitutes": [],
+      "note": "frozen is fine",
+      "group": ""
+     },
+     {
+      "id": "cumin",
+      "name": "Cumin seeds",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       30
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "garlic",
+      "name": "Garlic",
+      "amount": 6,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "cloves",
+      "role": "minor",
+      "grocy_product_ids": [
+       11
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "chilli",
+      "name": "Green chilli",
+      "amount": 5,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       12
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 4,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "ghee",
+      "name": "Ghee",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       4
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "mustard",
+      "name": "Mustard seeds",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       29
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "shallots",
+      "name": "Shallots",
+      "amount": 30,
+      "unit": "g",
+      "alt_amount": 3,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       8
+      ],
+      "substitutes": [],
+      "note": "sliced",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "sprig",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Dry-roast the dal until it smells nutty. Rinse, then pressure-cook with the turmeric and two cups of water until soft.",
+      "ingredient_ids": [
+       "dal",
+       "turmeric"
+      ],
+      "timer_seconds": 900
+     },
+     {
+      "text": "Grind the coconut, cumin, garlic and green chilli to a coarse paste.",
+      "ingredient_ids": [
+       "coconut",
+       "cumin",
+       "garlic",
+       "chilli"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Stir the paste and the salt into the dal and simmer.",
+      "ingredient_ids": [
+       "salt"
+      ],
+      "timer_seconds": 180
+     },
+     {
+      "text": "Heat the ghee, splutter the mustard seeds, add the shallots and curry leaves, and pour it all over the dal.",
+      "ingredient_ids": [
+       "ghee",
+       "mustard",
+       "shallots",
+       "curry"
+      ],
+      "timer_seconds": null
+     }
+    ]
+   }
+  },
+  {
+   "id": "sambar",
+   "recipe": {
+    "title": "Sambar",
+    "servings": 6,
+    "prep_minutes": 15,
+    "cook_minutes": 45,
+    "tags": [
+     "kerala",
+     "sadya",
+     "vegetarian"
+    ],
+    "source": "Recipie demo",
+    "description": "Toor dal and vegetables in a tangy tamarind gravy.",
+    "ingredients": [
+     {
+      "id": "dal",
+      "name": "Toor dal",
+      "amount": 150,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "cup",
+      "role": "main",
+      "grocy_product_ids": [
+       22
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "tamarind",
+      "name": "Tamarind",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "lime-sized ball",
+      "role": "minor",
+      "grocy_product_ids": [
+       31
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "beans",
+      "name": "Green beans",
+      "amount": 100,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "cup",
+      "role": "minor",
+      "grocy_product_ids": [
+       35
+      ],
+      "substitutes": [],
+      "note": "cut",
+      "group": ""
+     },
+     {
+      "id": "carrots",
+      "name": "Carrot",
+      "amount": 100,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       34
+      ],
+      "substitutes": [],
+      "note": "in chunks",
+      "group": ""
+     },
+     {
+      "id": "potato",
+      "name": "Potato",
+      "amount": 150,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       33
+      ],
+      "substitutes": [],
+      "note": "in chunks",
+      "group": ""
+     },
+     {
+      "id": "drumstick",
+      "name": "Drumstick",
+      "amount": null,
+      "unit": "",
+      "alt_amount": 1,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "shallots",
+      "name": "Shallots",
+      "amount": 60,
+      "unit": "g",
+      "alt_amount": 6,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       8
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "tomato",
+      "name": "Tomato",
+      "amount": 120,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       9
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "powder",
+      "name": "Sambar powder",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 8,
+      "unit": "g",
+      "alt_amount": 1.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "oil",
+      "name": "Coconut oil",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       3
+      ],
+      "substitutes": [
+       {
+        "name": "Sunflower oil",
+        "grocy_product_ids": [
+         5
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "mustard",
+      "name": "Mustard seeds",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       29
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "sprig",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Pressure-cook the dal with the turmeric until very soft, then mash it.",
+      "ingredient_ids": [
+       "dal",
+       "turmeric"
+      ],
+      "timer_seconds": 900
+     },
+     {
+      "text": "Soak the tamarind in a cup of warm water, then squeeze out the juice.",
+      "ingredient_ids": [
+       "tamarind"
+      ],
+      "timer_seconds": 600
+     },
+     {
+      "text": "Cook the vegetables and shallots in water with the salt until just tender.",
+      "ingredient_ids": [
+       "beans",
+       "carrots",
+       "potato",
+       "drumstick",
+       "shallots",
+       "salt"
+      ],
+      "timer_seconds": 600
+     },
+     {
+      "text": "Add the tamarind water, tomato and sambar powder and simmer.",
+      "ingredient_ids": [
+       "tamarind",
+       "tomato",
+       "powder"
+      ],
+      "timer_seconds": 600
+     },
+     {
+      "text": "Stir in the mashed dal and simmer until it comes together.",
+      "ingredient_ids": [
+       "dal"
+      ],
+      "timer_seconds": 300
+     },
+     {
+      "text": "Heat the oil, splutter the mustard seeds, add the curry leaves and pour over the sambar.",
+      "ingredient_ids": [
+       "oil",
+       "mustard",
+       "curry"
+      ],
+      "timer_seconds": null
+     }
+    ],
+    "notes": "Two minor things are out (tamarind and beans), so this shows yellow with a 2."
+   }
+  },
+  {
+   "id": "prawn-moilee",
+   "recipe": {
+    "title": "Prawn moilee",
+    "servings": 3,
+    "cook_minutes": 25,
+    "tags": [
+     "kerala",
+     "seafood"
+    ],
+    "source": "Recipie demo",
+    "description": "Prawns in a mild, pale coconut milk curry with ginger and green chilli.",
+    "ingredients": [
+     {
+      "id": "prawns",
+      "name": "Prawns",
+      "amount": 400,
+      "unit": "g",
+      "alt_amount": null,
+      "alt_unit": "",
+      "role": "main",
+      "grocy_product_ids": [
+       20
+      ],
+      "substitutes": [],
+      "note": "peeled and deveined",
+      "group": ""
+     },
+     {
+      "id": "milk",
+      "name": "Coconut milk",
+      "amount": 400,
+      "unit": "ml",
+      "alt_amount": 1,
+      "alt_unit": "can",
+      "role": "main",
+      "grocy_product_ids": [
+       15
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "pepper",
+      "name": "Black pepper",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       28
+      ],
+      "substitutes": [],
+      "note": "crushed",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 4,
+      "unit": "g",
+      "alt_amount": 0.75,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "oil",
+      "name": "Coconut oil",
+      "amount": 30,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       3
+      ],
+      "substitutes": [
+       {
+        "name": "Sunflower oil",
+        "grocy_product_ids": [
+         5
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "sprig",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "onion",
+      "name": "Onion",
+      "amount": 150,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "medium",
+      "role": "minor",
+      "grocy_product_ids": [
+       6,
+       7
+      ],
+      "substitutes": [],
+      "note": "sliced",
+      "group": ""
+     },
+     {
+      "id": "ginger",
+      "name": "Ginger",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       10
+      ],
+      "substitutes": [],
+      "note": "julienned",
+      "group": ""
+     },
+     {
+      "id": "chilli",
+      "name": "Green chillies",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       12
+      ],
+      "substitutes": [],
+      "note": "slit",
+      "group": ""
+     },
+     {
+      "id": "lemon",
+      "name": "Lemon juice",
+      "amount": 10,
+      "unit": "ml",
+      "alt_amount": 2,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       48
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Toss the prawns with the turmeric, pepper and salt and leave to marinate.",
+      "ingredient_ids": [
+       "prawns",
+       "turmeric",
+       "pepper",
+       "salt"
+      ],
+      "timer_seconds": 600
+     },
+     {
+      "text": "Heat the oil, add the curry leaves, onion, ginger and green chillies and cook until soft but not coloured.",
+      "ingredient_ids": [
+       "oil",
+       "curry",
+       "onion",
+       "ginger",
+       "chilli"
+      ],
+      "timer_seconds": 300
+     },
+     {
+      "text": "Add half the coconut milk, bring to a simmer, add the prawns and cook until just pink.",
+      "ingredient_ids": [
+       "milk",
+       "prawns"
+      ],
+      "timer_seconds": 240
+     },
+     {
+      "text": "Add the rest of the coconut milk and warm through without boiling. Finish with the lemon juice.",
+      "ingredient_ids": [
+       "milk",
+       "lemon"
+      ],
+      "timer_seconds": null
+     }
+    ],
+    "notes": "No prawns in the pantry, and they're the main ingredient, so this one is red."
+   }
+  },
+  {
+   "id": "kappa-puzhukku",
+   "recipe": {
+    "title": "Kappa puzhukku",
+    "servings": 4,
+    "cook_minutes": 40,
+    "tags": [
+     "kerala",
+     "vegetarian"
+    ],
+    "source": "Recipie demo",
+    "description": "Boiled tapioca mashed with crushed coconut, shallots and green chilli.",
+    "ingredients": [
+     {
+      "id": "kappa",
+      "name": "Tapioca (kappa)",
+      "amount": 1000,
+      "unit": "g",
+      "alt_amount": null,
+      "alt_unit": "",
+      "role": "main",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "peeled and cubed",
+      "group": ""
+     },
+     {
+      "id": "salt",
+      "name": "Salt",
+      "amount": 8,
+      "unit": "g",
+      "alt_amount": 1.25,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "coconut",
+      "name": "Grated coconut",
+      "amount": 80,
+      "unit": "g",
+      "alt_amount": 0.67,
+      "alt_unit": "cup",
+      "role": "minor",
+      "grocy_product_ids": [
+       16
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "shallots",
+      "name": "Shallots",
+      "amount": 40,
+      "unit": "g",
+      "alt_amount": 4,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       8
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "chilli",
+      "name": "Green chillies",
+      "amount": 10,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "",
+      "role": "minor",
+      "grocy_product_ids": [
+       12
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "garlic",
+      "name": "Garlic",
+      "amount": 6,
+      "unit": "g",
+      "alt_amount": 2,
+      "alt_unit": "cloves",
+      "role": "minor",
+      "grocy_product_ids": [
+       11
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "cumin",
+      "name": "Cumin seeds",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       30
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "turmeric",
+      "name": "Turmeric powder",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       24
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "oil",
+      "name": "Coconut oil",
+      "amount": 15,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "tbsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       3
+      ],
+      "substitutes": [
+       {
+        "name": "Sunflower oil",
+        "grocy_product_ids": [
+         5
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "mustard",
+      "name": "Mustard seeds",
+      "amount": 2,
+      "unit": "g",
+      "alt_amount": 0.5,
+      "alt_unit": "tsp",
+      "role": "minor",
+      "grocy_product_ids": [
+       29
+      ],
+      "substitutes": [],
+      "note": "",
+      "group": ""
+     },
+     {
+      "id": "curry",
+      "name": "Curry leaves, fresh",
+      "amount": 1,
+      "unit": "g",
+      "alt_amount": 1,
+      "alt_unit": "sprig",
+      "role": "minor",
+      "grocy_product_ids": [
+       13
+      ],
+      "substitutes": [
+       {
+        "name": "Curry leaves, dried",
+        "grocy_product_ids": [
+         14
+        ]
+       }
+      ],
+      "note": "",
+      "group": ""
+     }
+    ],
+    "steps": [
+     {
+      "text": "Boil the tapioca in salted water until soft, then drain.",
+      "ingredient_ids": [
+       "kappa",
+       "salt"
+      ],
+      "timer_seconds": 1200
+     },
+     {
+      "text": "Crush the coconut, shallots, green chillies, garlic, cumin and turmeric together coarsely.",
+      "ingredient_ids": [
+       "coconut",
+       "shallots",
+       "chilli",
+       "garlic",
+       "cumin",
+       "turmeric"
+      ],
+      "timer_seconds": null
+     },
+     {
+      "text": "Heat the oil, splutter the mustard seeds and add the curry leaves. Add the tapioca and the coconut mix, mash lightly, cover and steam.",
+      "ingredient_ids": [
+       "oil",
+       "mustard",
+       "curry",
+       "kappa",
+       "coconut"
+      ],
+      "timer_seconds": 180
+     }
+    ],
+    "notes": "Tapioca isn't linked to the pantry, so the app can't tell whether you have it: grey."
+   }
+  }
+ ]
+}

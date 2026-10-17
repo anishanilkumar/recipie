@@ -4,13 +4,14 @@ import { reason, STATUS_LABEL, type Status } from "../cookable";
 import { Lid } from "../components/Lid";
 import { SyncPill } from "../components/SyncPill";
 import { ago, minutes } from "../format";
-import { usePantry, useRecipes } from "../hooks";
+import { useMe, usePantry, useRecipes } from "../hooks";
 
 type Filter = "all" | Status;
 
 export function Home() {
   const recipes = useRecipes();
   const pantry = usePantry();
+  const me = useMe();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>(() => (localStorageGet("filter") as Filter) || "all");
 
@@ -44,6 +45,14 @@ export function Home() {
         <h1 className="wordmark">Recipie</h1>
         <SyncPill />
       </header>
+
+      {me?.demo ? (
+        <p className="demo-note">
+          A demo with a made-up pantry. Open a recipe, start cooking, or edit one: anything you change stays in
+          this browser and nobody else sees it.{" "}
+          <a href="https://github.com/anishanilkumar/recipie">Source on GitHub</a>
+        </p>
+      ) : null}
 
       {/* The one number this screen exists to show, the way a Jarvis tile does:
           how many recipes can be cooked right now. The three readouts are

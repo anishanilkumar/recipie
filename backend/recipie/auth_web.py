@@ -59,6 +59,8 @@ def _callback_url() -> str:
 
 def current_user(request: Request) -> str | None:
     s = settings()
+    if s.demo:
+        return "demo"
     if s.dev_user:
         return s.dev_user
     token = request.cookies.get(COOKIE)
@@ -69,6 +71,8 @@ def current_user(request: Request) -> str | None:
 
 @router.get("/login")
 async def login():
+    if settings().demo:
+        return RedirectResponse("/", status_code=302)
     meta = await _oidc()
     s = settings()
     state = secrets.token_urlsafe(32)

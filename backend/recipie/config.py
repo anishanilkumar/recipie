@@ -26,6 +26,9 @@ class Settings:
     dev_user: str
     session_days: int
     pantry_ttl_seconds: int
+    # Public demo (recipes-demo): no login, a made-up pantry, and nothing a
+    # visitor does is stored. See web.py.
+    demo: bool
 
     @property
     def secure_cookies(self) -> bool:
@@ -43,7 +46,11 @@ def settings() -> Settings:
         dev_user=os.environ.get("RECIPIE_DEV_USER", ""),
         session_days=int(os.environ.get("RECIPIE_SESSION_DAYS", "30")),
         pantry_ttl_seconds=int(os.environ.get("RECIPIE_PANTRY_TTL", "60")),
+        demo=os.environ.get("RECIPIE_DEMO", "") == "1",
     )
+    # The demo is public. It must never fall back to the real Grocy.
+    if s.demo and not os.environ.get("RECIPIE_PANTRY_FILE"):
+        raise RuntimeError("RECIPIE_DEMO needs RECIPIE_PANTRY_FILE: a public demo must not read the real pantry.")
     if s.dev_user and s.secure_cookies:
         raise RuntimeError("RECIPIE_DEV_USER skips login; it cannot be used with an https public URL.")
     return s
