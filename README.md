@@ -64,12 +64,42 @@ Claude ── OAuth bearer ────────▶ │   save_recipe, whats_
   offline.
 - **Browser login:** the backend is a confidential OIDC client and keeps
   sessions server-side (30 days, sliding). The PWA holds only an HttpOnly
-  cookie, never a token. Writes need an `X-Recipie: 1` header (CSRF).
+  cookie, never a token. Writes need an `X-Recipie: 1` header (CSRF). The
+  one exception to login is `/api/share/<slug>`, an event's share link.
 - **Claude login:** the MCP server is an OAuth 2.1 protected resource. It
   verifies bearer tokens offline against the issuer's keys, using the verifier
   from [grocy-mcp](https://github.com/anishanilkumar/grocy-mcp).
 - **Pantry:** read through grocy-mcp's Grocy client and cached for 60 seconds.
   If Grocy is down, the last snapshot is served and marked stale.
+
+## Events
+
+A menu cooked for other people, over one or more days, at `/events`. Each day
+has a headcount; each dish can link a recipe, be plain text with typed-in
+ingredients, or be marked "made ahead" (it adds nothing to the list).
+
+- **Share link:** `/e/<title>-<secret>`, e.g. `/e/lunch-menu-migrant-kitchen-yj47sf`.
+  It opens without a login: the six-character secret is the key. "New link"
+  changes only the secret (the old one stops at once), "Switch off" stops it
+  altogether, and the words can be renamed. Changing the event's title doesn't
+  change the link.
+- **Who can do what:** anyone with the link sees the menu and the linked
+  recipes (scaled to the day), ticks off the shopping, adds items, marks
+  dishes done, and leaves notes on a dish, a shopping line or the board. Only
+  the household changes the menu. Visitors' actions live in side tables
+  (`events.py`), so they never bump the menu's rev or cause a conflict.
+- **Shopping list:** worked out on the server (`shopping.py`): each linked
+  recipe is scaled from its servings to the day's headcount, and lines with
+  the same name and unit are summed across dishes and days (kg and l fold into
+  g and ml). Ticks are keyed by name and unit, so they survive menu edits.
+  The household can hide lines like salt. Grocy is not used: events are
+  cooked in another kitchen.
+- **Offline:** the share page keeps its last copy and an outbox in
+  localStorage, so it opens and takes ticks with no signal, and sends them in
+  order when it's back. While open it polls one number (`version`) every 8 s.
+
+Claude can create and edit events too (`save_event`, `get_event`,
+`list_events`, `share_event`): paste a menu and ask it to save it as an event.
 
 ## Adding the connector in Claude
 

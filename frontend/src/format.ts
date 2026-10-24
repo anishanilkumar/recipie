@@ -55,3 +55,12 @@ export function measures(
   const join = (n: number | null | undefined, unit?: string) => [amount(scaled(n, factor)), n != null ? unit : ""].filter(Boolean).join(" ");
   return { main: join(ing.amount, ing.unit), alt: join(ing.alt_amount, ing.alt_unit) };
 }
+
+/** A shopping quantity: 2500 g -> "2½ kg", 1500 ml -> "1½ l", 30 -> "30". */
+export function bulk(n: number | null | undefined, unit: string): string {
+  if (n == null) return "";
+  const u = unit.trim();
+  if (u === "g" && n >= 1000) return `${amount(n / 1000)} kg`;
+  if (u === "ml" && n >= 1000) return `${amount(n / 1000)} l`;
+  return [amount(n), u].filter(Boolean).join(" ");
+}

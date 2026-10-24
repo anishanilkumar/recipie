@@ -51,6 +51,63 @@ CREATE TABLE IF NOT EXISTS login_states (
     nonce       TEXT NOT NULL,
     created_at  REAL NOT NULL
 );
+
+-- Events (events.py). `version` is bumped by every write to the event or to
+-- anything hanging off it, so a shared page polls one number.
+CREATE TABLE IF NOT EXISTS events (
+    id            TEXT PRIMARY KEY,
+    slug          TEXT NOT NULL UNIQUE,
+    share_enabled INTEGER NOT NULL DEFAULT 1,
+    rev           INTEGER NOT NULL,
+    version       INTEGER NOT NULL DEFAULT 1,
+    deleted       INTEGER NOT NULL DEFAULT 0,
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL,
+    updated_by    TEXT NOT NULL DEFAULT '',
+    doc           TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS event_checks (
+    event_id    TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    key         TEXT NOT NULL,
+    checked     INTEGER NOT NULL,
+    by          TEXT NOT NULL DEFAULT '',
+    at          TEXT NOT NULL,
+    PRIMARY KEY (event_id, key)
+);
+
+CREATE TABLE IF NOT EXISTS event_items (
+    id          TEXT NOT NULL,
+    event_id    TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    amount      REAL,
+    unit        TEXT NOT NULL DEFAULT '',
+    checked     INTEGER NOT NULL DEFAULT 0,
+    checked_by  TEXT NOT NULL DEFAULT '',
+    added_by    TEXT NOT NULL DEFAULT '',
+    at          TEXT NOT NULL,
+    -- Ids can come from the page (events.add_item), so they're only unique per event.
+    PRIMARY KEY (event_id, id)
+);
+
+CREATE TABLE IF NOT EXISTS event_notes (
+    id          TEXT NOT NULL,
+    event_id    TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    target      TEXT NOT NULL,
+    author      TEXT NOT NULL DEFAULT '',
+    text        TEXT NOT NULL,
+    at          TEXT NOT NULL,
+    PRIMARY KEY (event_id, id)
+);
+
+CREATE TABLE IF NOT EXISTS event_dish_status (
+    event_id    TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    dish_id     TEXT NOT NULL,
+    status      TEXT NOT NULL,
+    by          TEXT NOT NULL DEFAULT '',
+    at          TEXT NOT NULL,
+    PRIMARY KEY (event_id, dish_id)
+);
 """
 
 

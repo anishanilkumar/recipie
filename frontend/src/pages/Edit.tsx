@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { productIds } from "../cookable";
+import { NumText } from "../components/NumText";
 import { saveLocal } from "../db";
 import { stepIngredients } from "../steps";
 import { usePantry, useRecipe } from "../hooks";
@@ -350,25 +351,4 @@ function PantryLinks({ ids, onChange, suggest, compact }: {
       )}
     </div>
   );
-}
-
-/** A number input that keeps what was typed ("1.", "1/2") and reports the parsed value. */
-function NumText({ value, onValue, ...rest }: {
-  value?: number | null;
-  onValue: (v: number | null) => void;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
-  const [text, setText] = useState(value == null ? "" : String(value));
-  return (
-    <input {...rest} inputMode="decimal" value={text}
-      onChange={(e) => { setText(e.target.value); onValue(parseNum(e.target.value)); }} />
-  );
-}
-
-function parseNum(s: string): number | null {
-  const t = s.trim().replace(",", ".");
-  if (!t) return null;
-  const frac = t.match(/^(\d+)\/(\d+)$/);
-  if (frac) return Number(frac[1]) / Number(frac[2]);
-  const n = Number(t);
-  return Number.isFinite(n) ? n : null;
 }

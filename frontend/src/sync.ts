@@ -43,19 +43,26 @@ export function useSyncState(): SyncState {
   );
 }
 
-class HttpError extends Error {
-  constructor(public status: number) {
-    super(`HTTP ${status}`);
+export class HttpError extends Error {
+  /** The server's `detail`, when it sent one: a sentence, or an object (409s). */
+  constructor(public status: number, public detail?: unknown) {
+    super(typeof detail === "string" ? detail : `HTTP ${status}`);
   }
 }
 
-async function api<T>(path: string, init?: RequestInit): Promise<T> {
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", "X-Recipie": "1", ...(init?.headers ?? {}) },
   });
-  if (!res.ok) throw new HttpError(res.status);
+  if (!res.ok) {
+    let detail: unknown;
+    try {
+      detail = ((await res.json()) as { detail?: unknown }).detail;
+    } catch { /* not JSON: nginx's own error page */ }
+    throw new HttpError(res.status, detail);
+  }
   return res.json() as Promise<T>;
 }
 

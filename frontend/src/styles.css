@@ -812,3 +812,203 @@ ul, ol { list-style: none; }
   .page-home:has(.demo-note) .tray,
   .page-home:has(.demo-note) .empty { grid-row: 3 / -1; }
 }
+
+/* ---- Events --------------------------------------------------------------- */
+
+/* An event is a menu cooked for other people, shared by a link that needs no
+   login. The share page is the same instrument as a recipe: bracketed panels,
+   the shopping list's engraved boxes. Nothing here uses the traffic-light
+   colours, which still mean only "can we cook it"; done is the arc, as a
+   ticked box is everywhere else. */
+
+.topbar-end { display: flex; align-items: center; gap: 1.25rem; }
+.topbar .back a { font-size: var(--t-min); }
+
+.panel-h {
+  font-family: var(--face-mono); font-size: var(--t-label); font-weight: 500;
+  letter-spacing: var(--track-label); text-transform: uppercase; color: var(--arc-dim);
+}
+.share-panel > .panel-h { margin-bottom: 0.5rem; }
+
+.share-head { display: flex; flex-direction: column; gap: 0.625rem; }
+.diet {
+  white-space: pre-wrap; max-width: 72ch;
+  border-left: 4px solid var(--arc-dim); background: var(--panel);
+  padding: 0.75rem var(--pad); color: var(--ink-dim); font-size: 0.9375rem;
+}
+
+.name-bar { display: flex; align-items: center; gap: 0.5rem; }
+.name-bar strong { color: var(--ink); font-weight: 500; }
+.name-form { align-items: flex-end; gap: 0.625rem; }
+.name-form .field { flex: 1; }
+.name-form input {
+  width: 100%; border: var(--rule) solid var(--engrave); background: var(--ground);
+  padding: 0.625rem 0.75rem; min-height: 46px;
+}
+.name-form input:focus { border-color: var(--arc-dim); outline: none; }
+
+/* Sections as a tab strip on a phone; side by side on a desktop. */
+.tabs { display: flex; border-bottom: var(--rule) solid var(--engrave); }
+.tab {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-height: 48px; border: 0; border-bottom: var(--rule) solid transparent; margin-bottom: calc(-1 * var(--rule));
+  background: none; cursor: pointer;
+  font-family: var(--face-mono); font-size: var(--t-label); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-dim);
+}
+.tab[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--arc); }
+.tab-n { color: var(--arc); }
+.share-panel:not(.is-shown) { display: none; }
+
+/* Menu */
+.menu-day + .menu-day { margin-top: 1.25rem; }
+.menu-day-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  font-size: 1.125rem; letter-spacing: -0.01em;
+  padding-bottom: 0.375rem; border-bottom: var(--rule) solid var(--engrave);
+}
+.dish { border-bottom: var(--rule) solid var(--engrave); }
+.dish:last-child { border-bottom: 0; }
+.dish-line { display: flex; align-items: flex-start; gap: 0.5rem; }
+.dish-tick { flex: none; padding: 0.875rem 0.375rem 0.875rem 0; }
+.dish-body {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.125rem;
+  background: none; border: 0; padding: 0.75rem 0; min-height: 56px; text-align: left; cursor: pointer;
+}
+.dish-name { font-size: 1.0625rem; font-weight: 600; line-height: 1.25; }
+.dish-desc { color: var(--ink-dim); font-size: 0.9375rem; }
+.dish-meta {
+  display: flex; flex-wrap: wrap; gap: 0.125rem 0.875rem; margin-top: 0.125rem;
+  font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim);
+}
+.dish-notes-n { color: var(--arc); }
+.dish-recipe { flex: none; padding: 0.875rem 0; min-height: 44px; }
+.dish-done .ing-box::after, .dish-already_made .ing-box::after { content: ""; position: absolute; inset: 0.2rem; background: var(--arc); }
+.dish-already_made .ing-box::after { background: var(--arc-dim); }
+.dish-done .dish-name { color: var(--ink-dim); text-decoration: line-through; text-decoration-thickness: 2px; }
+.dish-already_made .dish-name { color: var(--ink-dim); }
+.dish-more { display: flex; flex-direction: column; gap: 0.75rem; padding: 0 0 1rem 2rem; }
+
+/* Shopping */
+.warnings { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.5rem; }
+.warnings li { font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.04em; color: var(--gold); }
+.list-sub {
+  font-family: var(--face-mono); font-size: var(--t-min); font-weight: 400;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim);
+  margin: 1.25rem 0 0.25rem;
+}
+.share-line { flex-wrap: wrap; }
+.share-line .ing-text { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.375rem; }
+.share-line .ing-qty { margin-right: 0; white-space: nowrap; }
+.line-src {
+  flex-basis: 100%;
+  font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.04em; color: var(--slate);
+}
+/* Strike the thing, not who got it. */
+.share-line.ing-ticked .ing-text { text-decoration: none; }
+.share-line.ing-ticked .ing-qty, .share-line.ing-ticked .ing-name { text-decoration: line-through; text-decoration-thickness: 2px; }
+.line-side { flex: none; display: flex; align-items: center; gap: 0.625rem; }
+.line-notes {
+  border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 0.25rem;
+  font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.08em; text-transform: uppercase; color: var(--arc-dim);
+}
+.line-notes:hover, .line-notes[aria-expanded="true"] { color: var(--arc); }
+.line-x {
+  flex: none; width: 44px; height: 44px; border: 0; background: none; cursor: pointer;
+  color: var(--ink-dim); font-size: 1.25rem;
+}
+.line-x:hover { color: var(--alert); background: var(--engrave); }
+.line-thread { flex-basis: 100%; padding: 0 0 0.875rem 2.125rem; }
+.line-hidden .ing-text { color: var(--slate); text-decoration: line-through; }
+
+.add-item {
+  display: grid; grid-template-columns: minmax(0, 1fr) 4.5rem 4.5rem auto; gap: 0.375rem; margin-top: 0.875rem;
+}
+.add-item input {
+  width: 100%; min-width: 0; border: var(--rule) solid var(--engrave); background: var(--ground);
+  padding: 0.625rem 0.75rem; min-height: 46px;
+}
+.add-item input::placeholder, .thread-add textarea::placeholder, .name-form input::placeholder { color: var(--slate); }
+.add-item input:focus, .thread-add textarea:focus { border-color: var(--arc-dim); outline: none; }
+.add-item .btn { min-height: 46px; padding: 0 1rem; }
+@media (max-width: 26rem) {
+  .add-item { grid-template-columns: 1fr 1fr auto; }
+  .add-item input:first-child { grid-column: 1 / -1; }
+}
+
+/* Notes */
+.thread { display: flex; flex-direction: column; gap: 0.75rem; }
+.thread-list { display: flex; flex-direction: column; }
+.thread-list li { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.625rem 0; border-bottom: var(--rule) solid var(--engrave); }
+.thread-list li:first-child { padding-top: 0; }
+.thread-list p { white-space: pre-wrap; max-width: 64ch; }
+.thread-list .link-btn { align-self: flex-start; color: var(--alert); }
+.thread-compact .thread-list li { padding: 0.375rem 0; }
+.thread-compact .thread-list p { font-size: 0.9375rem; }
+.thread-add { display: flex; gap: 0.375rem; align-items: stretch; }
+.thread-add textarea {
+  flex: 1; min-width: 0; resize: vertical; border: var(--rule) solid var(--engrave); background: var(--ground);
+  padding: 0.625rem 0.75rem; min-height: 46px;
+}
+.thread-add .btn { min-height: 46px; padding: 0 1rem; }
+.dish-thread { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* The household's editor */
+.edit-day {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  padding-bottom: 1rem; border-bottom: var(--rule) solid var(--engrave);
+}
+.field-narrow { flex: 0 0 5.5rem !important; }
+.field input[type="date"] { min-width: 0; }
+.select {
+  width: 100%; min-height: 46px; border: var(--rule) solid var(--engrave); border-radius: 0; background: var(--ground);
+  color: var(--ink); font: inherit; padding: 0.5rem 0.75rem;
+}
+.select:focus { border-color: var(--arc-dim); outline: none; }
+.sub.extra { display: grid; grid-template-columns: 4.5rem 4.5rem minmax(0, 1fr) auto; gap: 0.375rem; }
+.sub.extra input {
+  width: 100%; min-width: 0; border: var(--rule) solid var(--engrave); background: var(--ground);
+  padding: 0.5rem 0.625rem; min-height: 42px;
+}
+@media (max-width: 26rem) {
+  .sub.extra { grid-template-columns: 4rem 4.5rem minmax(0, 1fr); }
+  .sub.extra .row-remove { grid-column: 1 / -1; justify-self: end; }
+}
+.day-tools { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; }
+.day-tools .link-btn { color: var(--alert); }
+.share-panel-edit { display: flex; flex-direction: column; gap: 0.625rem; }
+.share-url { font-family: var(--face-mono); font-size: 0.875rem; overflow-wrap: anywhere; }
+.share-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.share-panel-edit .field-row { align-items: flex-end; }
+
+@media (min-width: 64rem) and (min-height: 40rem) {
+  .share-panel {
+    overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--engrave) transparent;
+    background:
+      linear-gradient(var(--engrave), var(--engrave)) top left / var(--bracket) var(--rule) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) top left / var(--rule) var(--bracket) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) bottom right / var(--bracket) var(--rule) no-repeat,
+      linear-gradient(var(--engrave), var(--engrave)) bottom right / var(--rule) var(--bracket) no-repeat,
+      var(--panel);
+  }
+  .share-panel::before, .share-panel::after { display: none; }
+
+  /* Share page: what it is across the top, then menu, shopping and notes side
+     by side, each scrolling on its own. No tabs. */
+  .page-share {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    row-gap: var(--gap);
+  }
+  .page-share .topbar, .page-share .share-head { grid-column: 1 / -1; }
+  .page-share .share-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.5rem 2rem; align-items: start; }
+  .page-share .share-head > * { grid-column: 1; }
+  .page-share .share-head .diet { grid-column: 2; grid-row: 1 / span 4; }
+  .page-share .tabs { display: none; }
+  .page-share .share-panel { display: block; grid-row: 3; }
+
+  .page-events { max-width: 54rem; margin: 0 auto; }
+  .page-events .tray { min-height: 0; padding-bottom: 5rem; }
+}
+/* A dish's notes come after the recipe on a phone, like a recipe's Edit row. */
+.dish-thread { order: 1; }

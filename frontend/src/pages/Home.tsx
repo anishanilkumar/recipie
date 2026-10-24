@@ -43,7 +43,10 @@ export function Home() {
     <div className="page page-home">
       <header className="topbar">
         <h1 className="wordmark">Recipie</h1>
-        <SyncPill />
+        <span className="topbar-end">
+          <Link to="/events" className="pill">Events</Link>
+          <SyncPill />
+        </span>
       </header>
 
       {me?.demo ? (

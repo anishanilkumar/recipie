@@ -72,3 +72,24 @@ def test_steps_reference_ingredients_by_id():
     bad = {**recipe, "steps": [{"text": "Fry", "ingredient_ids": ["beef"]}]}
     with pytest.raises(Exception, match="not in this recipe: beef"):
         call("save_recipe", recipe=bad)
+
+
+def test_save_event_returns_a_share_link_and_scaled_list():
+    rice = call("save_recipe", recipe={"title": "Rice", "servings": 4, "ingredients": [
+        {"name": "Rice", "role": "main", "amount": 300, "unit": "g"}]})
+    event = {"title": "Migrant Kitchen", "days": [{"label": "Day 1", "headcount": 40, "dishes": [
+        {"name": "Rice", "recipe_id": rice["id"]}, {"name": "Inji curry", "status": "already_made"}]}]}
+    saved = call("save_event", event=event)
+    assert "/e/migrant-kitchen-" in saved["share_url"] and saved["shopping_lines"] == 1
+
+    got = call("get_event", id_or_title="migrant")
+    assert got["shopping"][0]["amount"] == 3000
+    assert [e["title"] for e in call("list_events")] == ["Migrant Kitchen"]
+
+    with pytest.raises(Exception, match="Someone edited it"):
+        call("save_event", event=got["event"], id=saved["id"], expected_rev=0)
+    with pytest.raises(Exception, match="aren't in the book"):
+        call("save_event", event={"title": "X", "days": [{"label": "D", "dishes": [{"name": "Y", "recipe_id": "nope"}]}]})
+
+    off = call("share_event", id=saved["id"], enabled=False)
+    assert off["share_enabled"] is False

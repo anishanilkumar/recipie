@@ -104,3 +104,70 @@ class RecipeDoc(BaseModel):
             if unknown:
                 raise ValueError(f"Step {n} uses ingredient ids that are not in this recipe: {', '.join(unknown)}")
         return self
+
+
+# --- events -----------------------------------------------------------------
+#
+# An event is a menu cooked for other people, possibly over several days, with
+# a shopping list shared through a link. Like a recipe, the menu is one
+# document owned and edited by the household; what visitors with the link do
+# (ticks, added items, notes, "done") is kept beside it in its own tables
+# (db.py), so a stranger's tick never bumps the menu's rev or conflicts with
+# an edit.
+
+# todo:         still to cook.
+# already_made: cooked ahead (or bought); adds nothing to the shopping list.
+# done:         cooked for this event.
+DishStatus = Literal["todo", "already_made", "done"]
+
+
+class EventItem(BaseModel):
+    """An ingredient typed in for the event, already in event quantities."""
+
+    id: str = Field(default_factory=new_id)
+    name: str = Field(min_length=1, max_length=120)
+    amount: float | None = None
+    unit: str = Field(default="", max_length=40)
+
+
+class Dish(BaseModel):
+    id: str = Field(default_factory=new_id)
+    name: str = Field(min_length=1, max_length=200)
+    description: str = Field(default="", max_length=500, description="e.g. 'stir-fried cabbage and carrot with coconut'")
+    recipe_id: str | None = Field(default=None, max_length=64, description="A recipe in the book; its ingredients go on the shopping list")
+    assignee: str = Field(default="", max_length=80, description="Who is cooking it")
+    effort: str = Field(default="", max_length=40, description="e.g. 'low'")
+    status: DishStatus = "todo"
+    extra_ingredients: list[EventItem] = Field(
+        default_factory=list, max_length=50,
+        description="Typed-in ingredients in event quantities, for dishes without a recipe or additions to one",
+    )
+
+
+class Day(BaseModel):
+    id: str = Field(default_factory=new_id)
+    label: str = Field(min_length=1, max_length=80, description="e.g. 'Day 1' or 'Saturday lunch'")
+    date: str = Field(default="", max_length=10, description="YYYY-MM-DD, optional")
+    headcount: int | None = Field(default=None, ge=1, le=10000, description="Recipe quantities are scaled to this")
+    dishes: list[Dish] = Field(default_factory=list, max_length=60)
+
+
+class EventDoc(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(default="", max_length=2000)
+    dietary_notes: str = Field(default="", max_length=2000, description="e.g. 'All vegetarian, mild spice. Contains dairy: pulissery.'")
+    days: list[Day] = Field(default_factory=list, max_length=30)
+    hidden_keys: list[str] = Field(
+        default_factory=list, max_length=200,
+        description="Shopping-list keys left off the list (salt, water)",
+    )
+
+    @model_validator(mode="after")
+    def _unique_ids(self):
+        days = [d.id for d in self.days]
+        dishes = [x.id for d in self.days for x in d.dishes]
+        for kind, ids in (("Day", days), ("Dish", dishes)):
+            dupes = sorted({i for i in ids if ids.count(i) > 1})
+            if dupes:
+                raise ValueError(f"{kind} ids must be unique within an event; repeated: {', '.join(dupes)}")
+        return self

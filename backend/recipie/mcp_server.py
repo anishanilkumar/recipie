@@ -12,8 +12,8 @@ import os
 
 from mcp.server.fastmcp import FastMCP
 
-from . import cookable, db, pantry
-from .models import RecipeDoc
+from . import cookable, db, events, pantry
+from .models import EventDoc, RecipeDoc
 
 INSTRUCTIONS = """\
 The household recipe book. Recipes saved here show up in the Recipie app on
@@ -66,6 +66,25 @@ ingredient leaves the badge grey ("can't tell").
 To change an existing recipe, get_recipe first and send the whole recipe back
 with your edits; save_recipe replaces it. Pass the rev you read as
 expected_rev so an edit made on the phone in the meantime is not overwritten.
+
+Events are menus cooked for other people, over one or more days, with a
+shopping list shared through a link that needs no login (the volunteers
+cooking have no accounts). Only create or change one when asked. When given a
+pasted menu:
+- One Day per day, with its headcount: recipe quantities on the shopping list
+  are scaled from the recipe's servings to it. Ask for headcounts if missing.
+- Match each dish to the book with list_recipes and set recipe_id. With no
+  match, keep the dish as plain text (name + description), and offer to save
+  a recipe for it; don't save one unless asked. Typed-in quantities for a
+  dish go in extra_ingredients, in event amounts (not scaled).
+- "Already made" or bought in -> status "already_made" (adds nothing to the
+  list). "Anish, low effort" -> assignee "Anish", effort "low".
+- Diet and allergen lines ("All vegetarian", "Contains dairy: pulissery")
+  go in dietary_notes, word for word.
+The pantry (Grocy) is not used for events: they're cooked in another kitchen.
+Give the user the share_url from save_event. To change an event, get_event
+first and send the whole event back with expected_rev, keeping the day and
+dish ids (ticks and notes hang off them).
 """
 
 
@@ -190,7 +209,76 @@ def register(mcp: FastMCP) -> FastMCP:
         """
         return pantry.search(query)
 
+    @mcp.tool()
+    def list_events() -> list[dict]:
+        """Events (menus for cooking for others), newest first, with their share links."""
+        return [{"id": e["id"], "title": e["doc"]["title"],
+                 "days": [d["label"] for d in e["doc"]["days"]],
+                 "share_url": events.share_url(e) if e["share_enabled"] else None}
+                for e in events.list_live()]
+
+    @mcp.tool()
+    def get_event(id_or_title: str) -> dict:
+        """The full event, its rev (pass it back as expected_rev), share link, and
+        shopping list as it stands, with what's been ticked off and the notes."""
+        v = events.view(_find_event(id_or_title), public=False)
+        v["event"] = v.pop("doc")
+        return v
+
+    @mcp.tool()
+    def save_event(event: EventDoc, id: str | None = None, expected_rev: int | None = None) -> dict:
+        """Create an event, or replace an existing one when id is given.
+
+        Only when the user has asked. Replacing sends the whole event: days or
+        dishes left out are removed, and ticks and notes on removed dishes go
+        with them. Returns the share link, which opens without a login.
+        """
+        if id is not None and events.get(id) is None:
+            raise ValueError(f"No event has id {id!r}. Omit id to create a new one.")
+        unknown = [d.name for day in event.days for d in day.dishes if d.recipe_id and db.get(d.recipe_id) is None]
+        if unknown:
+            raise ValueError(f"These dishes link recipe ids that aren't in the book: {', '.join(unknown)}. "
+                             "Use the id from list_recipes, or leave recipe_id empty.")
+        try:
+            row = events.save(event, event_id=id, base_rev=expected_rev, user="claude")
+        except db.Conflict as c:
+            raise ValueError(
+                f"Not saved: the event is at rev {c.current.get('rev')}, not {expected_rev}. "
+                "Someone edited it since you read it. Call get_event, merge, and save again."
+            ) from None
+        v = events.view(row, public=False)
+        return {"id": row["id"], "rev": row["rev"], "title": row["doc"]["title"],
+                "share_url": v["share_url"], "share_enabled": row["share_enabled"],
+                "shopping_lines": len([i for i in v["shopping"] if not i["hidden"]]),
+                "warnings": v["warnings"]}
+
+    @mcp.tool()
+    def share_event(id: str, enabled: bool | None = None, rotate: bool = False) -> dict:
+        """Switch an event's share link on or off, or rotate it (the old link stops
+        working at once; use when it reached the wrong people). Only when asked."""
+        try:
+            row = events.set_share(id, enabled=enabled, rotate=rotate)
+        except events.NotFound:
+            raise ValueError(f"No event has id {id!r}.") from None
+        return {"id": row["id"], "share_enabled": row["share_enabled"], "share_url": events.share_url(row)}
+
     return mcp
+
+
+def _find_event(id_or_title: str) -> dict:
+    row = events.get(id_or_title)
+    if row:
+        return row
+    q = id_or_title.casefold().strip()
+    rows = events.list_live()
+    exact = [r for r in rows if r["doc"]["title"].casefold() == q]
+    hits = exact or [r for r in rows if q in r["doc"]["title"].casefold()]
+    if len(hits) == 1:
+        return hits[0]
+    if not hits:
+        raise ValueError(f"No event matches {id_or_title!r}. Call list_events to see what exists.")
+    titles = ", ".join(r["doc"]["title"] for r in hits[:10])
+    raise ValueError(f"{len(hits)} events match {id_or_title!r}: {titles}. Ask which one, then use its id.")
 
 
 def build_server(*, host: str, port: int, public_host: str | None, public_url: str | None, auth: bool) -> FastMCP:
