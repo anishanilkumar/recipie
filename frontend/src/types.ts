@@ -203,4 +203,6 @@ export interface EventSummary {
   share_enabled: boolean;
   updated_at: string;
   days: { label: string; date: string; headcount: number | null; dishes: number }[];
+  /** Recipes the menu links, so the recipe list can say which events use them. */
+  recipe_ids: string[];
 }

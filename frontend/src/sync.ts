@@ -9,11 +9,12 @@
 //       titled "… (my edit)", so nothing typed in the kitchen is ever lost.
 //  2. Pull everything after our cursor. A recipe still dirty locally is left
 //     alone; its push will settle it.
-//  3. Refresh the pantry snapshot, which the badges are computed from.
+//  3. Refresh the pantry snapshot, which the badges are computed from, and
+//     the list of events, which says which recipes are on an event's menu.
 
 import { useSyncExternalStore } from "react";
 import { db, getKV, PANTRY_KEY, setKV } from "./db";
-import type { LocalRecipe, PantrySnapshot, ServerRow } from "./types";
+import type { EventSummary, LocalRecipe, PantrySnapshot, ServerRow } from "./types";
 import { newId } from "./types";
 
 export type SyncPhase = "idle" | "syncing" | "offline" | "signed-out" | "error";
@@ -165,6 +166,17 @@ async function refreshPantry(): Promise<void> {
   await setKV(PANTRY_KEY, snap);
 }
 
+export const EVENTS_KEY = "events";
+
+async function refreshEvents(): Promise<void> {
+  try {
+    const { events } = await api<{ events: EventSummary[] }>("/api/events");
+    await setKV(EVENTS_KEY, events);
+  } catch {
+    // Only labels on the recipe list: keep the last copy rather than fail the sync.
+  }
+}
+
 let running: Promise<void> | null = null;
 let again = false;
 
@@ -194,6 +206,7 @@ async function runOnce(): Promise<void> {
     if (await push()) await push();
     await pull();
     await refreshPantry();
+    await refreshEvents();
     await setKV("me", await api<{ username: string; demo: boolean }>("/api/me"));
     const now = new Date().toISOString();
     await setKV("lastSyncedAt", now);

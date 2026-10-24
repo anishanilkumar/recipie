@@ -98,6 +98,8 @@ def events_router() -> APIRouter:
             "share_enabled": e["share_enabled"], "updated_at": e["updated_at"],
             "days": [{"label": d["label"], "date": d.get("date", ""), "headcount": d.get("headcount"),
                       "dishes": len(d["dishes"])} for d in e["doc"]["days"]],
+            # So the recipe list can say which events use a recipe, and hide them.
+            "recipe_ids": sorted({x["recipe_id"] for d in e["doc"]["days"] for x in d["dishes"] if x.get("recipe_id")}),
         } for e in events.list_live()]}
 
     @r.post("")

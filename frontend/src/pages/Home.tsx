@@ -4,7 +4,7 @@ import { reason, STATUS_LABEL, type Status } from "../cookable";
 import { Lid } from "../components/Lid";
 import { SyncPill } from "../components/SyncPill";
 import { ago, minutes } from "../format";
-import { useMe, usePantry, useRecipes } from "../hooks";
+import { useMe, usePantry, useRecipeEvents, useRecipes } from "../hooks";
 
 type Filter = "all" | Status;
 
@@ -14,29 +14,42 @@ export function Home() {
   const me = useMe();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>(() => (localStorageGet("filter") as Filter) || "all");
+  const byRecipe = useRecipeEvents();
+  // Big-batch recipes made for an event ("Rajma (30)") crowd out the everyday
+  // ones; this takes them off the list, and out of the counts, until wanted.
+  const [hideEvents, setHideEvents] = useState(() => localStorageGet("hideEvents") === "1");
+  const eventCount = useMemo(() => (recipes ?? []).filter(({ recipe }) => byRecipe.has(recipe.id)).length, [recipes, byRecipe]);
+  const visible = useMemo(
+    () => (recipes ?? []).filter(({ recipe }) => !(hideEvents && byRecipe.has(recipe.id))),
+    [recipes, hideEvents, byRecipe],
+  );
 
   const counts = useMemo(() => {
     const c: Record<Filter, number> = { all: 0, ready: 0, almost: 0, no: 0, unknown: 0 };
-    for (const r of recipes ?? []) {
+    for (const r of visible) {
       c.all++;
       c[r.verdict.status]++;
     }
     return c;
-  }, [recipes]);
+  }, [visible]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (recipes ?? []).filter(({ recipe, verdict }) => {
+    return visible.filter(({ recipe, verdict }) => {
       if (filter !== "all" && verdict.status !== filter) return false;
       if (!q) return true;
       const d = recipe.doc;
       return [d.title, ...(d.tags ?? []), ...d.ingredients.map((i) => i.name)].some((s) => s.toLowerCase().includes(q));
     });
-  }, [recipes, filter, query]);
+  }, [visible, filter, query]);
 
   const choose = (f: Filter) => {
     setFilter(f);
     localStorageSet("filter", f);
+  };
+  const toggleEvents = (hide: boolean) => {
+    setHideEvents(hide);
+    localStorageSet("hideEvents", hide ? "1" : "0");
   };
 
   return (
@@ -91,15 +104,24 @@ export function Home() {
         </div>
       </section>
 
-      <label className="search">
-        <span className="visually-hidden">Search recipes</span>
-        <input
-          type="search"
-          placeholder="Search by name, tag or ingredient"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </label>
+      <div className="search">
+        <label>
+          <span className="visually-hidden">Search recipes</span>
+          <input
+            type="search"
+            placeholder="Search by name, tag or ingredient"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+        {eventCount ? (
+          <button className="link-btn search-tool" aria-pressed={hideEvents} onClick={() => toggleEvents(!hideEvents)}>
+            {hideEvents
+              ? `Show ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`
+              : `Hide ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`}
+          </button>
+        ) : null}
+      </div>
 
       {recipes === undefined ? null : recipes.length === 0 ? (
         <div className="empty">
@@ -112,7 +134,7 @@ export function Home() {
       ) : shown.length === 0 ? (
         <div className="empty">
           <p className="empty-title">Nothing matches.</p>
-          <button className="btn" onClick={() => { setQuery(""); choose("all"); }}>
+          <button className="btn" onClick={() => { setQuery(""); choose("all"); toggleEvents(false); }}>
             Show all recipes
           </button>
         </div>
@@ -128,6 +150,9 @@ export function Home() {
                   <span className="row-body">
                     <span className="row-title">{d.title}</span>
                     <span className={`row-why why-${verdict.status}`}>{reason(verdict)}</span>
+                    {byRecipe.has(recipe.id) ? (
+                      <span className="row-events">{byRecipe.get(recipe.id)!.map((e) => e.title).join(" · ")}</span>
+                    ) : null}
                   </span>
                   <span className="row-meta">
                     {time ? minutes(time) : null}

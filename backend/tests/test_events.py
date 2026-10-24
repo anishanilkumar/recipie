@@ -45,6 +45,11 @@ def test_create_gives_a_readable_link_with_a_secret(made):
     assert made["shopping"][0]["amount"] == 3000  # 300 g × 40/4
 
 
+def test_event_list_names_the_recipes_it_uses(client, made):
+    [e] = client.get("/api/events").json()["events"]
+    assert e["recipe_ids"] == [made["doc"]["days"][0]["dishes"][0]["recipe_id"]]
+
+
 def test_owner_edit_with_stale_rev_is_a_conflict(client, made):
     doc = {**made["doc"], "title": "Renamed"}
     ok = client.put(f"/api/events/{made['id']}", json={"base_rev": 1, "doc": doc}, headers=W)

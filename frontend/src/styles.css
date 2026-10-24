@@ -1012,3 +1012,13 @@ ul, ol { list-style: none; }
 }
 /* A dish's notes come after the recipe on a phone, like a recipe's Edit row. */
 .dish-thread { order: 1; }
+
+/* ---- Recipe list: which events use a recipe ----------------------------- */
+
+.search { display: flex; flex-direction: column; gap: 0.25rem; }
+.search-tool { align-self: flex-end; min-height: 36px; }
+.row-events {
+  font-family: var(--face-mono); font-size: var(--t-min); letter-spacing: 0.04em;
+  color: var(--arc-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row-events::before { content: "On the menu: "; color: var(--slate); }
