@@ -33,9 +33,10 @@ substitutes (coconut oil, or ghee). Then:
 
 Unlinked minor ingredients (salt, water) are assumed to be in the kitchen.
 
-The rules exist twice: in Python for the MCP server
-(`backend/recipie/cookable.py`) and in TypeScript so the badge works offline
-(`frontend/src/cookable.ts`). Both are tested against
+The rules exist three times: in Python for the MCP server
+(`backend/recipie/cookable.py`), in TypeScript so the PWA's badge works
+offline (`frontend/src/cookable.ts`), and in Kotlin for the Android app
+(`android/.../logic/Cookable.kt`). All three are tested against
 `shared/cookable-cases.json`. Change them together.
 
 ## Architecture
@@ -66,6 +67,8 @@ Claude ── OAuth bearer ────────▶ │   save_recipe, whats_
   sessions server-side (30 days, sliding). The PWA holds only an HttpOnly
   cookie, never a token. Writes need an `X-Recipie: 1` header (CSRF). The
   one exception to login is `/api/share/<slug>`, an event's share link.
+  The Android app sends the same kind of session as a bearer token (see
+  Android app).
 - **Claude login:** the MCP server is an OAuth 2.1 protected resource. It
   verifies bearer tokens offline against the issuer's keys, using the verifier
   from [grocy-mcp](https://github.com/anishanilkumar/grocy-mcp).
@@ -100,6 +103,31 @@ ingredients, or be marked "made ahead" (it adds nothing to the list).
 
 Claude can create and edit events too (`save_event`, `get_event`,
 `list_events`, `share_event`): paste a menu and ask it to save it as an event.
+
+## Android app
+
+The recipes are the **Cook** tab of the household's Kitchen app
+(`~/projects/kitchen/app`), beside the food log and the inventory. It has the
+recipe list with its lids, the recipe page, cook mode, the recipe editor, and
+the household's side of events. The share page an event's link opens stays on
+the web: the cooks have no app.
+
+What it adds over the PWA: timers that ring on time with the screen off (an
+AlarmManager alarm and an alarm-sound notification), the screen kept on in
+cook mode, background sync of edits made without signal, Send link for an
+event, and, with the inventory beside it, taking what a dish used out of
+stock and putting what a recipe lacks on the shopping list.
+
+**Sign-in** is Foodlog's handoff, so no new Kanidm client is needed. The app
+keeps a random verifier and opens `/auth/login?app_challenge=S256(verifier)`
+in a browser tab. After sign-in the server shows a page that sends the tab to
+`recipie://signed-in?code=…`, and the app trades the code and the verifier
+for a session at `/auth/app/exchange`. Codes are single-use and last two
+minutes. The session goes to `/api` as a bearer token.
+
+The app's tests run the cookability rules against `shared/cookable-cases.json`
+here, so the rules exist three times (Python, TypeScript, Kotlin) and are held
+to the same cases.
 
 ## Adding the connector in Claude
 

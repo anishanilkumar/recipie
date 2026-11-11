@@ -52,6 +52,17 @@ CREATE TABLE IF NOT EXISTS login_states (
     created_at  REAL NOT NULL
 );
 
+-- The Android app's sign-in handoff (auth_web.py): a one-time code the
+-- browser passes back to the app, redeemable only with the verifier whose
+-- hash the app sent when the sign-in started. The session is created at
+-- redemption, so nothing here is a usable credential on its own.
+CREATE TABLE IF NOT EXISTS app_handoffs (
+    code_hash   TEXT PRIMARY KEY,
+    username    TEXT NOT NULL,
+    challenge   TEXT NOT NULL,
+    created_at  REAL NOT NULL
+);
+
 -- Events (events.py). `version` is bumped by every write to the event or to
 -- anything hanging off it, so a shared page polls one number.
 CREATE TABLE IF NOT EXISTS events (
@@ -133,6 +144,10 @@ def connect(path: str | None = None) -> sqlite3.Connection:
 def init(path: str | None = None) -> None:
     with closing(connect(path)) as conn:
         conn.executescript(SCHEMA)
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(login_states)")}
+        if "app_challenge" not in cols:
+            # Added with the Android app: set when the sign-in was started by it.
+            conn.execute("ALTER TABLE login_states ADD COLUMN app_challenge TEXT NOT NULL DEFAULT ''")
     _migrate_single_product_ids(path)
 
 
@@ -286,14 +301,37 @@ def delete(recipe_id: str, *, base_rev: int | None = None, user: str = "") -> di
 
 # --- sessions ----------------------------------------------------------------
 
-def put_login_state(state: str, verifier: str, nonce: str) -> None:
+def put_login_state(state: str, verifier: str, nonce: str, app_challenge: str = "") -> None:
     with write_tx() as conn:
         # Abandoned logins are swept here rather than by a timer.
         conn.execute("DELETE FROM login_states WHERE created_at < ?", (time.time() - 600,))
         conn.execute(
-            "INSERT INTO login_states (state, verifier, nonce, created_at) VALUES (?, ?, ?, ?)",
-            (state, verifier, nonce, time.time()),
+            "INSERT INTO login_states (state, verifier, nonce, created_at, app_challenge) VALUES (?, ?, ?, ?, ?)",
+            (state, verifier, nonce, time.time(), app_challenge),
         )
+
+
+HANDOFF_SECONDS = 120
+
+
+def put_app_handoff(code_hash: str, username: str, challenge: str) -> None:
+    with write_tx() as conn:
+        conn.execute("DELETE FROM app_handoffs WHERE created_at < ?", (time.time() - HANDOFF_SECONDS,))
+        conn.execute(
+            "INSERT INTO app_handoffs (code_hash, username, challenge, created_at) VALUES (?, ?, ?, ?)",
+            (code_hash, username, challenge, time.time()),
+        )
+
+
+def pop_app_handoff(code_hash: str) -> dict | None:
+    """Single use: the row is gone after the first attempt, right or wrong."""
+    with write_tx() as conn:
+        r = conn.execute(
+            "SELECT * FROM app_handoffs WHERE code_hash = ? AND created_at >= ?",
+            (code_hash, time.time() - HANDOFF_SECONDS),
+        ).fetchone()
+        conn.execute("DELETE FROM app_handoffs WHERE code_hash = ?", (code_hash,))
+    return dict(r) if r else None
 
 
 def pop_login_state(state: str) -> dict | None:
