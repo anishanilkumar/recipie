@@ -106,8 +106,8 @@ Claude can create and edit events too (`save_event`, `get_event`,
 
 ## Android app
 
-The recipes are the **Cook** tab of the household's Kitchen app
-(`~/projects/kitchen/app`), beside the food log and the inventory. It has the
+The recipes are the **Cook** tab of Friday, the household's Android app
+(`anishanilkumar/friday`), beside the food log and the inventory. It has the
 recipe list with its lids, the recipe page, cook mode, the recipe editor, and
 the household's side of events. The share page an event's link opens stays on
 the web: the cooks have no app.
@@ -118,12 +118,12 @@ cook mode, background sync of edits made without signal, Send link for an
 event, and, with the inventory beside it, taking what a dish used out of
 stock and putting what a recipe lacks on the shopping list.
 
-**Sign-in** is Foodlog's handoff, so no new Kanidm client is needed. The app
-keeps a random verifier and opens `/auth/login?app_challenge=S256(verifier)`
-in a browser tab. After sign-in the server shows a page that sends the tab to
-`recipie://signed-in?code=…`, and the app trades the code and the verifier
-for a session at `/auth/app/exchange`. Codes are single-use and last two
-minutes. The session goes to `/api` as a bearer token.
+**Sign-in** is Friday's one sign-in: the app signs in to Kanidm once (client
+`friday`) and shows the ID token here at `/auth/app/friday`
+(`backend/recipie/friday_sso.py`), which gives a session only when the token's
+`friday_access` claim, set by Kanidm from the user's groups, includes
+`recipes`. The session goes to `/api` as a bearer token. The older per-app
+handoff (`/auth/login?app_challenge=`, `/auth/app/exchange`) is still there.
 
 The app's tests run the cookability rules against `shared/cookable-cases.json`
 here, so the rules exist three times (Python, TypeScript, Kotlin) and are held
