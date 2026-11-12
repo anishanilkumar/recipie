@@ -319,5 +319,6 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--no-auth", action="store_true", help="local testing only")
     a = p.parse_args(argv)
     db.init()
+    pantry.watch_changes()  # drop the cached pantry on pantry.changed, as the web app does
     build_server(host=a.host, port=a.port, public_host=a.public_host, public_url=a.public_url,
                  auth=not a.no_auth).run(transport="streamable-http")
