@@ -25,6 +25,10 @@ class Settings:
     # login flow is skipped. Refused when the public URL is https.
     dev_user: str
     session_days: int
+    # The Kitchen Android app's one sign-in (kitchen_sso.py): Kanidm's issuer
+    # for its public client, and the client id. Empty: the endpoint is off.
+    kitchen_issuer: str
+    kitchen_client_id: str
     pantry_ttl_seconds: int
     # Public demo (recipes-demo): no login, a made-up pantry, and nothing a
     # visitor does is stored. See web.py.
@@ -45,6 +49,8 @@ def settings() -> Settings:
         oidc_client_secret=os.environ.get("RECIPIE_OIDC_CLIENT_SECRET", ""),
         dev_user=os.environ.get("RECIPIE_DEV_USER", ""),
         session_days=int(os.environ.get("RECIPIE_SESSION_DAYS", "30")),
+        kitchen_issuer=os.environ.get("RECIPIE_KITCHEN_ISSUER", "").rstrip("/"),
+        kitchen_client_id=os.environ.get("RECIPIE_KITCHEN_CLIENT_ID", ""),
         pantry_ttl_seconds=int(os.environ.get("RECIPIE_PANTRY_TTL", "60")),
         demo=os.environ.get("RECIPIE_DEMO", "") == "1",
     )
