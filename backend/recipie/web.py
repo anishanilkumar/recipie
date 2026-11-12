@@ -272,6 +272,7 @@ def share_router() -> APIRouter:
 def create_app() -> FastAPI:
     db.init()
     app = FastAPI(title="Recipie", docs_url=None, redoc_url=None, openapi_url=None)
+    pantry.watch_changes()
     app.include_router(auth_web.router)
     app.include_router(events_router())
     app.include_router(share_router())

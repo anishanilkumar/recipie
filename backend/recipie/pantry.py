@@ -57,6 +57,29 @@ def set_source(fn: Callable[[], dict]) -> None:
     _source, _cached, _cached_at = fn, None, 0.0
 
 
+def forget() -> None:
+    """The pantry changed (the inventory app said so): read it afresh next time.
+    The old copy stays as the fallback if Grocy can't be reached then."""
+    global _cached_at
+    with _lock:
+        _cached_at = 0.0
+
+
+def watch_changes() -> None:
+    """Drop the cached pantry whenever pantry.changed arrives over NATS (RECIPIE_NATS_URL).
+    Off when unset; the TTL alone keeps it right within a minute either way."""
+    from . import natslite
+    changed = natslite.from_env("wait", "pantry.changed")
+    if not changed.url:
+        return
+
+    def run():
+        while True:
+            if changed.wait(3600):
+                forget()
+    threading.Thread(target=run, daemon=True, name="pantry-changes").start()
+
+
 def snapshot(max_age: float | None = None) -> dict:
     """{fetched_at, stale, error?, products: [...], stock: {id: amount}}."""
     global _cached, _cached_at
