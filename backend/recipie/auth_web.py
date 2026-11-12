@@ -27,7 +27,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
-from . import db, kitchen_sso
+from . import db, friday_sso
 from .config import settings
 
 log = logging.getLogger(__name__)
@@ -230,28 +230,28 @@ async def app_exchange(body: Exchange):
     return {"token": token, "username": handoff["username"], "days": s.session_days}
 
 
-class KitchenSignIn(BaseModel):
+class FridaySignIn(BaseModel):
     id_token: str = Field(min_length=20, max_length=8000)
 
 
-@router.post("/app/kitchen")
-async def kitchen_sign_in(body: KitchenSignIn):
-    """The Kitchen app's one sign-in, traded for a session here (kitchen_sso.py)."""
+@router.post("/app/friday")
+async def friday_sign_in(body: FridaySignIn):
+    """Friday's one sign-in, traded for a session here (friday_sso.py)."""
     s = settings()
-    if s.demo or not (s.kitchen_issuer and s.kitchen_client_id):
-        raise HTTPException(503, "The Kitchen app's sign-in is not configured on this server.")
+    if s.demo or not (s.friday_issuer and s.friday_client_id):
+        raise HTTPException(503, "Friday's sign-in is not configured on this server.")
     try:
         username = await asyncio.to_thread(
-            kitchen_sso.verify, body.id_token,
-            issuer=s.kitchen_issuer, client_id=s.kitchen_client_id, access="recipes",
+            friday_sso.verify, body.id_token,
+            issuer=s.friday_issuer, client_id=s.friday_client_id, access="recipes",
         )
-    except kitchen_sso.Refused as exc:
+    except friday_sso.Refused as exc:
         raise HTTPException(403, str(exc))
-    except kitchen_sso.Invalid as exc:
+    except friday_sso.Invalid as exc:
         raise HTTPException(401, str(exc))
     token = secrets.token_urlsafe(32)
     db.create_session(_hash(token), username, s.session_days)
-    log.info("signed in (kitchen app): %s", username)
+    log.info("signed in (friday): %s", username)
     return {"token": token, "username": username, "days": s.session_days}
 
 

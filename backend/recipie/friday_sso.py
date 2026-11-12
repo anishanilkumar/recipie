@@ -1,10 +1,10 @@
-"""One sign-in for the Kitchen Android app.
+"""One sign-in for Friday, the household Android app.
 
-The app signs in once, with Kanidm, as its own public client (`kitchen-app`),
+The app signs in once, with Kanidm, as its own public client (`friday`),
 and gets an ID token. It shows that token here, and to the food log and the
 inventory, and each issues its own session as if the user had signed in to
 it. One password, one browser trip, and the access is still Kanidm's: the
-token carries a `kitchen_access` claim that Kanidm fills from the user's
+token carries a `friday_access` claim that Kanidm fills from the user's
 groups (a claim map on the client), and each server only lets in a token
 that names it. Someone with recipes but not the food log gets the Cook tab
 and nothing else.
@@ -29,7 +29,7 @@ import jwt
 
 log = logging.getLogger(__name__)
 
-CLAIM = "kitchen_access"
+CLAIM = "friday_access"
 # Issued within this long ago. The app trades the token the moment it has it.
 MAX_AGE_SECONDS = 600
 
@@ -70,7 +70,7 @@ def verify(id_token: str, *, issuer: str, client_id: str, access: str, now: floa
             options={"require": ["exp", "iat", "iss", "aud", "sub"]},
         )
     except (jwt.PyJWTError, httpx.HTTPError) as exc:
-        log.warning("rejecting kitchen id_token: %s", exc)
+        log.warning("rejecting friday id_token: %s", exc)
         raise Invalid("The sign-in could not be verified. Sign in again.")
     if now - float(claims["iat"]) > MAX_AGE_SECONDS:
         raise Invalid("That sign-in is too old to use. Sign in again.")
@@ -79,6 +79,6 @@ def verify(id_token: str, *, issuer: str, client_id: str, access: str, now: floa
         granted = [v for v in granted.replace(",", " ").split() if v]
     username = claims.get("preferred_username") or claims["sub"]
     if access not in granted:
-        log.info("kitchen sign-in refused for %s: %s not in %s", username, access, granted)
+        log.info("friday sign-in refused for %s: %s not in %s", username, access, granted)
         raise Refused("Your account doesn't have access to this. Ask for it in Kanidm.")
     return username
