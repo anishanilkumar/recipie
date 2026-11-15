@@ -88,7 +88,8 @@ opened, the page keeps a copy and opens again with no signal.
 A recipe has no link until one is made. "New link" replaces the secret (the old
 link stops at once) and "Switch off" stops it; deleting the recipe does too.
 The link lives in its own table (`shares.py`), so it never bumps the recipe's
-rev. Claude can do the same with `share_recipe`.
+rev. Claude can do the same with `share_recipe`, and Friday's Cook tab has the
+same Share key on a recipe.
 
 ## Events
 
