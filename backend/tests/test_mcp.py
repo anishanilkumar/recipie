@@ -93,3 +93,12 @@ def test_save_event_returns_a_share_link_and_scaled_list():
 
     off = call("share_event", id=saved["id"], enabled=False)
     assert off["share_enabled"] is False
+
+
+def test_share_recipe_makes_a_link_and_switches_it_off():
+    saved = call("save_recipe", recipe=CURRY)
+    on = call("share_recipe", id=saved["id"])
+    assert on["share_enabled"] and "/s/chicken-curry-" in on["share_url"]
+    assert call("share_recipe", id=saved["id"])["share_url"] == on["share_url"]
+    off = call("share_recipe", id=saved["id"], enabled=False)
+    assert off["share_enabled"] is False and off["share_url"] is None

@@ -1,7 +1,8 @@
 """The HTTP API the PWA talks to.
 
-Everything under /api needs a session, except /api/share/<slug>: an event's
-share link, where the link itself is the key.
+Everything under /api needs a session, except the share links, where the link
+itself is the key: /api/share/<slug> (an event) and /api/recipe-share/<slug>
+(one recipe, read only).
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ import logging
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, ValidationError
 
-from . import auth_web, db, events, pantry, shopping
+from . import auth_web, db, events, pantry, shares, shopping
 from .config import settings
 from .models import DishStatus, EventDoc, RecipeDoc
 
@@ -269,6 +270,33 @@ def share_router() -> APIRouter:
     return r
 
 
+# --- one recipe's share link ---------------------------------------------------
+
+class RecipeShareBody(BaseModel):
+    enabled: bool | None = None
+    rotate: bool = False
+
+
+def recipes_router() -> APIRouter:
+    r = APIRouter(prefix="/api/recipes", dependencies=[Depends(require_user)])
+
+    @r.get("/{recipe_id}/share")
+    def read(recipe_id: str):
+        return shares.status(recipe_id)
+
+    @r.post("/{recipe_id}/share")
+    def share(recipe_id: str, body: RecipeShareBody):
+        if settings().demo:
+            raise HTTPException(403, "Recipes can't be shared from the demo.")
+        try:
+            return shares.set_share(recipe_id, enabled=body.enabled, rotate=body.rotate)
+        except events.NotFound:
+            # Usually a recipe made on this phone that hasn't synced yet.
+            raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
+
+    return r
+
+
 def create_app() -> FastAPI:
     db.init()
     app = FastAPI(title="Recipie", docs_url=None, redoc_url=None, openapi_url=None)
@@ -276,6 +304,15 @@ def create_app() -> FastAPI:
     app.include_router(auth_web.router)
     app.include_router(events_router())
     app.include_router(share_router())
+    app.include_router(recipes_router())
+
+    # No session: the link is the key, and all it does is read.
+    @app.get("/api/recipe-share/{slug}")
+    def shared_recipe(slug: str):
+        row = shares.by_slug(slug)
+        if row is None:
+            raise HTTPException(404, "This link doesn't open anything. Ask for a new one.")
+        return row
 
     @app.get("/api/health")
     def health():

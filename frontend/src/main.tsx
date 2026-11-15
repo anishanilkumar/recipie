@@ -10,6 +10,7 @@ import { EventEdit } from "./pages/EventEdit";
 import { Events } from "./pages/Events";
 import { EventShare, SharedCook, SharedDish } from "./pages/EventShare";
 import { Home } from "./pages/Home";
+import { SharedRecipe, SharedRecipeCook } from "./pages/RecipeShare";
 import { RecipeView } from "./pages/RecipeView";
 import { startSync } from "./sync";
 
@@ -26,12 +27,16 @@ const router = createBrowserRouter([
   { path: "/e/:slug", element: <EventShare /> },
   { path: "/e/:slug/d/:dishId", element: <SharedDish /> },
   { path: "/e/:slug/d/:dishId/cook", element: <SharedCook /> },
+  // One recipe's share link: read only.
+  { path: "/s/:slug", element: <SharedRecipe /> },
+  { path: "/s/:slug/cook", element: <SharedRecipeCook /> },
 ]);
 
 registerSW({ immediate: true });
 // Someone opening a share link has no account: syncing the recipe book would
-// only meet 401s. Their page talks to /api/share itself (events.ts).
-if (!location.pathname.startsWith("/e/")) void startSync();
+// only meet 401s. Their page talks to /api/share itself (events.ts), or to
+// /api/recipe-share (recipeShare.ts).
+if (!/^\/[es]\//.test(location.pathname)) void startSync();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

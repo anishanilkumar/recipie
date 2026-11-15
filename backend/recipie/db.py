@@ -119,6 +119,15 @@ CREATE TABLE IF NOT EXISTS event_dish_status (
     at          TEXT NOT NULL,
     PRIMARY KEY (event_id, dish_id)
 );
+
+-- A recipe's share link (shares.py). Kept out of the recipes row so the link
+-- never touches a recipe's rev or seq.
+CREATE TABLE IF NOT EXISTS recipe_shares (
+    recipe_id   TEXT PRIMARY KEY,
+    slug        TEXT NOT NULL UNIQUE,
+    enabled     INTEGER NOT NULL DEFAULT 1,
+    created_at  TEXT NOT NULL
+);
 """
 
 

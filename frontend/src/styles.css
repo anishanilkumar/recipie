@@ -441,7 +441,8 @@ ul, ol { list-style: none; }
 .source { margin-top: 1rem; font-family: var(--face-mono); font-size: var(--t-min); color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; }
 .source a { color: var(--ink-dim); }
 
-.recipe-actions { display: flex; gap: 0.625rem; padding-top: 0.75rem; border-top: var(--rule) solid var(--engrave); }
+.recipe-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; padding-top: 0.75rem; border-top: var(--rule) solid var(--engrave); }
+.recipe-share { flex: 1 0 100%; display: flex; flex-direction: column; gap: 0.625rem; }
 
 @media (min-width: 56rem) {
   .page-recipe { max-width: 72rem; }

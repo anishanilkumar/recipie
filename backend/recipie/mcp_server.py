@@ -12,7 +12,7 @@ import os
 
 from mcp.server.fastmcp import FastMCP
 
-from . import cookable, db, events, pantry
+from . import cookable, db, events, pantry, shares
 from .models import EventDoc, RecipeDoc
 
 INSTRUCTIONS = """\
@@ -66,6 +66,10 @@ ingredient leaves the badge grey ("can't tell").
 To change an existing recipe, get_recipe first and send the whole recipe back
 with your edits; save_recipe replaces it. Pass the rev you read as
 expected_rev so an edit made on the phone in the meantime is not overwritten.
+
+A recipe can be sent to someone outside the household with share_recipe: it
+gives a link that opens without a login, read only. Only when asked; a recipe
+has no link until then.
 
 Events are menus cooked for other people, over one or more days, with a
 shopping list shared through a link that needs no login (the volunteers
@@ -186,6 +190,19 @@ def register(mcp: FastMCP) -> FastMCP:
             raise ValueError(f"No recipe has id {id!r}.")
         row = db.save(row["doc"], recipe_id=id, user="claude")
         return {"restored": row["id"], "title": row["doc"]["title"]}
+
+    @mcp.tool()
+    def share_recipe(id: str, enabled: bool | None = None, rotate: bool = False) -> dict:
+        """Get a link to one recipe that opens without a login, for sending to
+        someone outside the household. They can read it and cook from it, not
+        change it, and they see later edits. Calling it makes the link if there
+        is none. enabled=false switches it off; rotate=true replaces it (the old
+        link stops at once). Only when asked."""
+        row = db.get(id)
+        if row is None:
+            raise ValueError(f"No recipe has id {id!r}. Use the id from list_recipes.")
+        s = shares.set_share(id, enabled=enabled, rotate=rotate)
+        return {"id": id, "title": row["doc"]["title"], "share_enabled": s["enabled"], "share_url": s["url"]}
 
     @mcp.tool()
     def whats_cookable() -> dict:

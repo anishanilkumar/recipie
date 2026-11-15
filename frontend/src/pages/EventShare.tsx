@@ -389,7 +389,7 @@ function Missing({ phase }: { phase: SharePhase }) {
 }
 
 /** Keep the secret link out of search engines and other sites' logs. */
-function usePrivatePage(title?: string) {
+export function usePrivatePage(title?: string) {
   useEffect(() => {
     const metas = [["robots", "noindex, nofollow"], ["referrer", "no-referrer"]].map(([name, content]) => {
       const m = document.createElement("meta");

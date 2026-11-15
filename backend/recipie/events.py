@@ -40,10 +40,10 @@ class TooMany(Exception):
     pass
 
 
-def readable(title: str) -> str:
+def readable(title: str, fallback: str = "event") -> str:
     s = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode().lower()
     s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
-    return s[:48].rstrip("-") or "event"
+    return s[:48].rstrip("-") or fallback
 
 
 def _secret() -> str:

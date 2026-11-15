@@ -66,7 +66,8 @@ Claude ── OAuth bearer ────────▶ │   save_recipe, whats_
 - **Browser login:** the backend is a confidential OIDC client and keeps
   sessions server-side (30 days, sliding). The PWA holds only an HttpOnly
   cookie, never a token. Writes need an `X-Recipie: 1` header (CSRF). The
-  one exception to login is `/api/share/<slug>`, an event's share link.
+  exceptions to login are the share links: `/api/share/<slug>` (an event) and
+  `/api/recipe-share/<slug>` (one recipe, read only).
   The Android app sends the same kind of session as a bearer token (see
   Android app).
 - **Claude login:** the MCP server is an OAuth 2.1 protected resource. It
@@ -74,6 +75,20 @@ Claude ── OAuth bearer ────────▶ │   save_recipe, whats_
   from [grocy-mcp](https://github.com/anishanilkumar/grocy-mcp).
 - **Pantry:** read through grocy-mcp's Grocy client and cached for 60 seconds.
   If Grocy is down, the last snapshot is served and marked stale.
+
+## Sharing a recipe
+
+**Share** on a recipe's page makes a link, `/s/<title>-<secret>`, e.g.
+`/s/nadan-chicken-curry-jsd45q`, to send to someone outside the household. It
+opens without a login and shows that one recipe: the ingredients with a
+servings stepper, the method, and cook mode. It is read only, shows the recipe
+as it is now (later edits included), and leaves out the pantry links. Once
+opened, the page keeps a copy and opens again with no signal.
+
+A recipe has no link until one is made. "New link" replaces the secret (the old
+link stops at once) and "Switch off" stops it; deleting the recipe does too.
+The link lives in its own table (`shares.py`), so it never bumps the recipe's
+rev. Claude can do the same with `share_recipe`.
 
 ## Events
 
