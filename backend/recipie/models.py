@@ -100,6 +100,8 @@ class RecipeDoc(BaseModel):
     notes: str = Field(default="", max_length=5000)
     prep_ahead: PrepAhead | None = Field(
         default=None, description="Only for a step that must happen hours before (soaking, thawing, overnight marinade)")
+    archived: bool = Field(
+        default=False, description="Put away: kept, but off the recipe list and out of suggestions. Keep it as get_recipe returned it.")
 
     @model_validator(mode="after")
     def _references(self):

@@ -102,3 +102,19 @@ def test_share_recipe_makes_a_link_and_switches_it_off():
     assert call("share_recipe", id=saved["id"])["share_url"] == on["share_url"]
     off = call("share_recipe", id=saved["id"], enabled=False)
     assert off["share_enabled"] is False and off["share_url"] is None
+
+
+def test_archived_recipes_leave_the_lists_until_asked():
+    a = call("save_recipe", recipe={"title": "Everyday dal"})
+    b = call("save_recipe", recipe={"title": "Old party rice"})
+    out = call("archive_recipe", id=b["id"])
+    assert out["archived"] is True
+    assert [r["title"] for r in call("list_recipes")] == ["Everyday dal"]
+    every = call("list_recipes", include_archived=True)
+    assert {r["title"]: r.get("archived", False) for r in every} == {"Everyday dal": False, "Old party rice": True}
+    groups = call("whats_cookable")
+    assert all(r["id"] != b["id"] for g in ("ready", "almost", "no", "unknown") for r in groups[g])
+    # A later edit that sends the whole recipe back keeps the flag.
+    assert call("get_recipe", id_or_title=b["id"])["recipe"]["archived"] is True
+    call("archive_recipe", id=b["id"], archived=False)
+    assert len(call("list_recipes")) == 2 and a["id"]

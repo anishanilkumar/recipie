@@ -6,7 +6,7 @@ import { PhotoPanel, RecipePhoto } from "../components/RecipePhoto";
 import { usePhotos } from "../photos";
 import { Qty } from "../components/Qty";
 import { StepIngredients } from "../components/StepIngredients";
-import { deleteLocal, markOpened } from "../db";
+import { deleteLocal, markOpened, saveLocal } from "../db";
 import { clock, minutes } from "../format";
 import { usePantry, useRecipe } from "../hooks";
 import { getRecipeShare, setRecipeShare, type RecipeShareState } from "../recipeShare";
@@ -59,6 +59,12 @@ export function RecipeView() {
     navigate("/", { replace: true });
   };
 
+  // Put away, or brought back: an ordinary edit, so it syncs and works offline.
+  const toggleArchive = async () => {
+    await saveLocal(recipe.id, { ...d, archived: !d.archived });
+    syncSoon();
+  };
+
   return (
     <div className="page page-recipe">
       {/* The summary column on desktop. On a phone it dissolves
@@ -66,6 +72,13 @@ export function RecipeView() {
           with the Edit/Delete row moved to the end by CSS order. */}
       <aside className="recipe-side">
       <BackLink />
+
+      {d.archived ? (
+        <p className="archived-note">
+          Archived: off the recipe list and out of suggestions.{" "}
+          <button className="link-btn" onClick={() => void toggleArchive()}>Bring it back</button>
+        </p>
+      ) : null}
 
       {recipe ? <RecipePhoto recipeId={recipe.id} photos={photos[recipe.id]} /> : null}
 
@@ -97,6 +110,7 @@ export function RecipeView() {
       <footer className="recipe-actions">
         <Link to={`/r/${recipe.id}/edit`} className="btn">Edit</Link>
         <button className="btn" aria-expanded={sharing} onClick={() => { setSharing((x) => !x); setPhotoOpen(false); }}>Share</button>
+        <button className="btn btn-quiet" onClick={() => void toggleArchive()}>{d.archived ? "Unarchive" : "Archive"}</button>
         <button className="btn" aria-expanded={photoOpen} onClick={() => { setPhotoOpen((x) => !x); setSharing(false); }}>Photo</button>
         <button className={`btn ${confirmDelete ? "btn-danger" : "btn-quiet"}`} onClick={remove}>
           {confirmDelete ? "Tap again to delete" : "Delete"}

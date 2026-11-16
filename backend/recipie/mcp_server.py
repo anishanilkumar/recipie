@@ -22,6 +22,10 @@ the user's phone, which works offline in the kitchen.
 Only save, change or delete a recipe when the user asks for it. Talking about
 a recipe is not an instruction to store it.
 
+Archived recipes are put away: kept, but left out of list_recipes and
+whats_cookable, and not to be suggested. archive_recipe puts one away or
+brings it back, only when asked.
+
 When saving, structure it for cooking: one ingredient per line; steps short enough to read from across the counter; a timer_seconds on
 any step that waits ("simmer 20 minutes" -> 1200).
 
@@ -125,26 +129,31 @@ def _find(id_or_title: str) -> dict:
 
 def register(mcp: FastMCP) -> FastMCP:
     @mcp.tool()
-    def list_recipes(query: str = "", tag: str = "", cookable_only: bool = False) -> list[dict]:
+    def list_recipes(query: str = "", tag: str = "", cookable_only: bool = False, include_archived: bool = False) -> list[dict]:
         """List recipes with whether each can be cooked from the pantry right now.
 
         cookable: ready (everything there), almost (1-2 minor items missing or a
         main ingredient covered by a substitute), no (a main ingredient missing,
         or 3+ items), unknown (a main ingredient isn't linked to the pantry).
         Filters: query matches title, tags and ingredient names; cookable_only
-        keeps ready and almost.
+        keeps ready and almost. Archived recipes (put away by the household) are
+        left out unless include_archived; don't suggest them.
         """
         stock = pantry.stock()
         q, t = query.casefold().strip(), tag.casefold().strip()
         out = []
         for row in db.list_live():
             doc = row["doc"]
+            if doc.get("archived") and not include_archived:
+                continue
             hay = " ".join([doc["title"], *doc.get("tags", []), *(i["name"] for i in doc.get("ingredients", []))]).casefold()
             if q and q not in hay:
                 continue
             if t and t not in (x.casefold() for x in doc.get("tags", [])):
                 continue
             s = _summary(row, stock)
+            if doc.get("archived"):
+                s["archived"] = True
             if cookable_only and s["cookable"] not in ("ready", "almost"):
                 continue
             out.append(s)
@@ -197,6 +206,17 @@ def register(mcp: FastMCP) -> FastMCP:
         return {"restored": row["id"], "title": row["doc"]["title"]}
 
     @mcp.tool()
+    def archive_recipe(id: str, archived: bool = True) -> dict:
+        """Put a recipe away (archived=true) or bring it back (false). An
+        archived recipe is kept but leaves the list and suggestions. Only when asked."""
+        row = db.get(id)
+        if row is None:
+            raise ValueError(f"No recipe has id {id!r}. Use the id from list_recipes(include_archived=True).")
+        doc = {**row["doc"], "archived": archived}
+        row = db.save(RecipeDoc.model_validate(doc), recipe_id=id, base_rev=row["rev"], user="claude")
+        return {"id": row["id"], "title": row["doc"]["title"], "archived": row["doc"]["archived"]}
+
+    @mcp.tool()
     def share_recipe(id: str, enabled: bool | None = None, rotate: bool = False) -> dict:
         """Get a link to one recipe that opens without a login, for sending to
         someone outside the household. They can read it and cook from it, not
@@ -215,6 +235,8 @@ def register(mcp: FastMCP) -> FastMCP:
         stock = pantry.stock()
         groups: dict[str, list] = {"ready": [], "almost": [], "no": [], "unknown": []}
         for row in db.list_live():
+            if row["doc"].get("archived"):
+                continue
             s = _summary(row, stock)
             groups[s.pop("cookable")].append(s)
         snap = pantry.snapshot()

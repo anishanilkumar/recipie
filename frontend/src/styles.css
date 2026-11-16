@@ -1118,3 +1118,12 @@ ul, ol { list-style: none; }
   margin: 0.25rem 0 0; font-family: var(--face-mono); font-size: 0.6875rem; color: var(--slate);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+
+/* ---- Archived recipes ------------------------------------------------------ */
+.archived-mark { color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; }
+.archived-note {
+  margin: 0; padding: 0.625rem 0.875rem;
+  border: var(--rule) solid var(--engrave); background: var(--panel);
+  font-family: var(--face-mono); font-size: var(--t-min); color: var(--ink-dim);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+}

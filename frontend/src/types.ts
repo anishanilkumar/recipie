@@ -48,6 +48,8 @@ export interface RecipeDoc {
   notes?: string;
   /** Something to do well before cooking (soak, thaw); Mealplan reminds the evening before. */
   prep_ahead?: { note: string; hours_before?: number | null } | null;
+  /** Put away: kept, but off the list and out of Mealplan's and Claude's suggestions. */
+  archived?: boolean;
 }
 
 /** A recipe as stored in the browser. */

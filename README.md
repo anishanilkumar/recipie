@@ -55,6 +55,12 @@ kind, and the Ready / Almost / Not tonight counts with it. The rules are in
 `frontend/src/browse.ts` and Friday's `cook/logic/Browse.kt`; change them
 together.
 
+**Archive** on a recipe puts it away: it's kept, but leaves the list, the
+counts and the tag row ("Show N archived" brings them back), and Claude's
+`list_recipes`, `whats_cookable` and Mealplan's pickers leave it out. It's a
+field on the recipe (`archived`), so it syncs and works offline like any
+edit; Claude can do it with `archive_recipe`.
+
 ## Photos
 
 Each recipe has two photo slots (`backend/recipie/photos.py`), kept outside

@@ -26,10 +26,14 @@ export function Home() {
   // Big-batch recipes made for an event ("Rajma (30)") crowd out the everyday
   // ones; this takes them off the list, and out of the counts, until wanted.
   const [hideEvents, setHideEvents] = useState(() => localStorageGet("hideEvents") === "1");
+  // Archived recipes are off the list, and out of the counts, until asked for.
+  const [showArchived, setShowArchived] = useState(() => localStorageGet("showArchived") === "1");
+  const archivedCount = useMemo(() => (recipes ?? []).filter(({ recipe }) => recipe.doc.archived).length, [recipes]);
   const eventCount = useMemo(() => (recipes ?? []).filter(({ recipe }) => byRecipe.has(recipe.id)).length, [recipes, byRecipe]);
   const listable = useMemo(
-    () => (recipes ?? []).filter(({ recipe }) => !(hideEvents && byRecipe.has(recipe.id))),
-    [recipes, hideEvents, byRecipe],
+    () => (recipes ?? []).filter(({ recipe }) =>
+      !(hideEvents && byRecipe.has(recipe.id)) && (showArchived || !recipe.doc.archived)),
+    [recipes, hideEvents, byRecipe, showArchived],
   );
   const tags = useMemo(() => tagChoices(listable.map((r) => r.recipe)), [listable]);
   // A remembered tag nobody uses any more (renamed, or its recipes hidden) shouldn't empty the list.
@@ -71,6 +75,10 @@ export function Home() {
   const chooseSort = (s: Sort) => {
     setSort(s);
     localStorageSet("sort", s);
+  };
+  const toggleArchived = (show: boolean) => {
+    setShowArchived(show);
+    localStorageSet("showArchived", show ? "1" : "0");
   };
   const toggleEvents = (hide: boolean) => {
     setHideEvents(hide);
@@ -158,6 +166,11 @@ export function Home() {
               </button>
             ))}
           </span>
+          {archivedCount ? (
+            <button className="link-btn search-tool" aria-pressed={showArchived} onClick={() => toggleArchived(!showArchived)}>
+              {showArchived ? "Hide archived" : `Show ${archivedCount} archived`}
+            </button>
+          ) : null}
           {eventCount ? (
             <button className="link-btn search-tool" aria-pressed={hideEvents} onClick={() => toggleEvents(!hideEvents)}>
               {hideEvents
@@ -205,6 +218,7 @@ export function Home() {
                   <span className="row-meta">
                     {time ? minutes(time) : null}
                     {recipe.dirty ? <span className="unsent" title="Not synced yet">unsent</span> : null}
+                    {d.archived ? <span className="archived-mark">archived</span> : null}
                   </span>
                   <Thumb recipeId={recipe.id} title={d.title} photos={photos[recipe.id]} />
                 </Link>
