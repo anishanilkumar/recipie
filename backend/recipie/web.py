@@ -2,7 +2,8 @@
 
 Everything under /api needs a session, except the share links, where the link
 itself is the key: /api/share/<slug> (an event) and /api/recipe-share/<slug>
-(one recipe, read only).
+(one recipe, read only), and /api/service/, where another household service
+reads with its own token (service.py).
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import logging
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, ValidationError
 
-from . import auth_web, db, events, pantry, shares, shopping
+from . import auth_web, db, events, pantry, service, shares, shopping
 from .config import settings
 from .models import DishStatus, EventDoc, RecipeDoc
 
@@ -349,6 +350,12 @@ def create_app() -> FastAPI:
                 # One malformed recipe must not wedge the outbox forever.
                 results.append({"id": ch.id, "status": "invalid", "error": e.errors(include_url=False)})
         return {"results": results}
+
+    # Another household service reading the book (service.py): read only.
+    @app.get("/api/service/sync")
+    def service_pull(since: int = 0, caller: str = Depends(service.require_service)):
+        rows, cursor, more = db.changes_since(max(0, since))
+        return {"cursor": cursor, "more": more, "changes": rows}
 
     @app.get("/api/pantry")
     def get_pantry(user: str = Depends(require_user)):

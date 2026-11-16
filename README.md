@@ -145,6 +145,19 @@ The app's tests run the cookability rules against `shared/cookable-cases.json`
 here, so the rules exist three times (Python, TypeScript, Kotlin) and are held
 to the same cases.
 
+## Other services reading the book
+
+Mealplan (`../mealplan`) plans meals from these recipes and keeps a copy.
+It reads `GET /api/service/sync?since=N`, the same feed as `/api/sync`, with
+a bearer token it gets from Kanidm by the client-credentials grant, as its
+own OAuth2 client; nobody signs in (`backend/recipie/service.py`). The token
+is checked offline with the MCP server's verifier, and opens only that GET:
+not `/api/sync`, not a write. Unconfigured, the endpoint answers 503.
+
+Every save or delete also sends an empty `recipes.changed` over NATS (when
+`RECIPIE_NATS_URL` is set), so the copy is re-read at once rather than at
+Mealplan's next 10-minute look.
+
 ## Adding the connector in Claude
 
 Settings → Connectors → Add custom connector:
@@ -190,6 +203,8 @@ npm test
 | `RECIPIE_PUBLIC_URL` | web | e.g. `https://recipes.anishsheela.com` |
 | `RECIPIE_OIDC_ISSUER` / `_CLIENT_ID` / `_CLIENT_SECRET` | web | Browser login |
 | `RECIPIE_MCP_OIDC_ISSUER` / `_JWKS_URI` / `_AUDIENCE` / `_SCOPES` | mcp | Bearer token checks |
+| `RECIPIE_SERVICE_OIDC_ISSUER` / `_JWKS_URI` / `_AUDIENCE` / `_SCOPES` | web | Service tokens (Mealplan) for `/api/service/sync` |
+| `RECIPIE_NATS_URL` / `_NATS_USER` / `_NATS_PASSWORD_FILE` | both | `pantry.changed` in, `recipes.changed` out |
 | `GROCY_API_URL` / `GROCY_API_KEY` | both | Pantry reads |
 
 ## Deploying

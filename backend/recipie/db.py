@@ -131,6 +131,23 @@ CREATE TABLE IF NOT EXISTS recipe_shares (
 """
 
 
+_announcer = None
+
+
+def _announce_change() -> None:
+    """Tell whoever listens (Mealplan) that a recipe changed: `recipes.changed`.
+
+    An empty ping over NATS (RECIPIE_NATS_URL; off when unset). The recipe
+    itself stays on the HTTPS API.
+    """
+    global _announcer
+    if _announcer is None:
+        from . import natslite
+
+        _announcer = natslite.from_env("announce", "recipes.changed")
+    _announcer.poke()
+
+
 class Conflict(Exception):
     def __init__(self, current: dict):
         super().__init__("recipe changed since it was read")
@@ -288,7 +305,9 @@ def save(
                  updated_by = excluded.updated_by, doc = excluded.doc""",
             (recipe_id, current_rev + 1, seq, now_iso(), user, body),
         )
-        return _row(conn.execute("SELECT * FROM recipes WHERE id = ?", (recipe_id,)).fetchone())
+        row = _row(conn.execute("SELECT * FROM recipes WHERE id = ?", (recipe_id,)).fetchone())
+    _announce_change()
+    return row
 
 
 def delete(recipe_id: str, *, base_rev: int | None = None, user: str = "") -> dict | None:
@@ -305,7 +324,9 @@ def delete(recipe_id: str, *, base_rev: int | None = None, user: str = "") -> di
             "UPDATE recipes SET rev = rev + 1, seq = ?, deleted = 1, updated_at = ?, updated_by = ? WHERE id = ?",
             (_next_seq(conn), now_iso(), user, recipe_id),
         )
-        return _row(conn.execute("SELECT * FROM recipes WHERE id = ?", (recipe_id,)).fetchone())
+        row = _row(conn.execute("SELECT * FROM recipes WHERE id = ?", (recipe_id,)).fetchone())
+    _announce_change()
+    return row
 
 
 # --- sessions ----------------------------------------------------------------
