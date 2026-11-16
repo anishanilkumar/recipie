@@ -129,6 +129,12 @@ CREATE TABLE IF NOT EXISTS recipe_shares (
     created_at  TEXT NOT NULL
 );
 
+-- Household settings shared by every device: the recipe categories (categories.py).
+CREATE TABLE IF NOT EXISTS household (
+    key         TEXT PRIMARY KEY,
+    value       TEXT NOT NULL
+);
+
 -- A recipe's photos (photos.py): "own", a photo of the plate, and "web", a
 -- stand-in found on the web, with its credit. Own is shown when there is one.
 -- Like shares, kept out of the recipes row: a photo never bumps a rev.

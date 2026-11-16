@@ -4,7 +4,8 @@ import { productIds } from "../cookable";
 import { NumText } from "../components/NumText";
 import { saveLocal } from "../db";
 import { stepIngredients } from "../steps";
-import { usePantry, useRecipe } from "../hooks";
+import { useCategories, usePantry, useRecipe } from "../hooks";
+import { tagTextHas, toggleTagText } from "../browse";
 import { syncSoon } from "../sync";
 import type { Ingredient, PantryProduct, RecipeDoc, Role, Step } from "../types";
 import { newId } from "../types";
@@ -23,6 +24,7 @@ export function Edit() {
   const navigate = useNavigate();
   const [doc, setDoc] = useState<RecipeDoc | null>(id ? null : EMPTY);
   const [tagText, setTagText] = useState("");
+  const categories = useCategories();
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -120,6 +122,19 @@ export function Edit() {
           <NumberField label="Hours before" value={doc.prep_ahead.hours_before}
             onChange={(v) => patch({ prep_ahead: { note: doc.prep_ahead!.note, hours_before: v } })} />
         ) : null}
+      </div>
+
+      <div className="field">
+        <span>Categories</span>
+        <div className="tag-strip tag-strip-wrap" role="group" aria-label="Categories">
+          {categories.map((c) => {
+            const on = tagTextHas(tagText, c);
+            return (
+              <button type="button" key={c} className={`tag-chip${on ? " is-on" : ""}`} aria-pressed={on}
+                onClick={() => setTagText((t) => toggleTagText(t, c))}>{c}</button>
+            );
+          })}
+        </div>
       </div>
 
       <label className="field">

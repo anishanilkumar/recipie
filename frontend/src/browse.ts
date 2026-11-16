@@ -59,6 +59,31 @@ export function isNew(id: string, opened: Record<string, string>, arrived: Recor
 }
 
 /**
+ * The household's categories as the list offers them: in their own order, each
+ * with how many recipes carry its tag (none is shown too, so the row is steady).
+ */
+export function categoryChoices(recipes: LocalRecipe[], categories: string[]): TagChoice[] {
+  return categories.map((label) => {
+    const key = tagKey(label);
+    return { key, label, count: recipes.filter((r) => hasTag(r, key)).length };
+  });
+}
+
+/** Whether "kerala, Rice-cooker" holds the category "Rice cooker". */
+export function tagTextHas(tagText: string, category: string): boolean {
+  const key = tagKey(category);
+  return tagText.split(",").some((t) => tagKey(t) === key);
+}
+
+/** Add the category's tag to the comma list, or take it out (any spelling of it). */
+export function toggleTagText(tagText: string, category: string): string {
+  const key = tagKey(category);
+  const tags = tagText.split(",").map((t) => t.trim()).filter(Boolean);
+  const kept = tags.filter((t) => tagKey(t) !== key);
+  return (kept.length === tags.length ? [...tags, category.toLowerCase()] : kept).join(", ");
+}
+
+/**
  * Recent: new recipes first, newest arrival on top; then the last opened on
  * this device. A recipe never opened here goes by when it was last saved.
  */

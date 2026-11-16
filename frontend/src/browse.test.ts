@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasTag, isNew, sortRecipes, tagChoices, tagKey } from "./browse";
+import { categoryChoices, hasTag, isNew, sortRecipes, tagChoices, tagKey, tagTextHas, toggleTagText } from "./browse";
 import type { LocalRecipe } from "./types";
 
 const r = (id: string, title: string, tags: string[], updated_at = "2026-01-01T00:00:00Z"): { recipe: LocalRecipe } => ({
@@ -18,6 +18,23 @@ describe("tags", () => {
     expect(choices[0]).toEqual({ key: "kerala", label: "kerala", count: 3 });
     expect(choices[1]).toEqual({ key: "dessert", label: "dessert", count: 1 });
     expect(hasTag(rows[2].recipe, "kerala")).toBe(true);
+  });
+});
+
+describe("categories", () => {
+  it("are tags with a place in the row, in their own order, empty ones too", () => {
+    const rows = [r("a", "A", ["Rice-cooker", "curry"]), r("b", "B", ["baking"])];
+    expect(categoryChoices(rows.map((x) => x.recipe), ["Baking", "Rice cooker", "Oven"])).toEqual([
+      { key: "baking", label: "Baking", count: 1 },
+      { key: "rice cooker", label: "Rice cooker", count: 1 },
+      { key: "oven", label: "Oven", count: 0 },
+    ]);
+  });
+
+  it("toggle in the editor's tag text", () => {
+    expect(toggleTagText("kerala", "Rice cooker")).toBe("kerala, rice cooker");
+    expect(toggleTagText("kerala, Rice-Cooker", "Rice cooker")).toBe("kerala");
+    expect(tagTextHas("kerala, Rice-Cooker", "Rice cooker")).toBe(true);
   });
 });
 

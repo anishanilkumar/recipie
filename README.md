@@ -49,9 +49,14 @@ of a fresh install marks nothing new.
 device (a recipe never opened here goes by when it was last saved, so one
 Claude just added shows near the top); **A–Z** is the other order. Opens are
 kept on the device only and never synced, so each phone or browser has its
-own order. Under the search, a row of tags (most-used first; "Kerala" and
-"kerala", "make-ahead" and "make ahead" count as one) narrows the list to one
-kind, and the Ready / Almost / Not tonight counts with it. The rules are in
+own order. Under the search, a row of the household's **categories**
+(Baking, Rice cooker, Curry, Oven, Noodles to start; "Edit" at the end of the
+row changes them for every device) narrows the list to one, and the Ready /
+Almost / Not tonight counts with it. A category is a tag with a place in that
+row: a recipe is in "Rice cooker" when it has the tag "rice cooker" ("Rice-Cooker"
+counts too), so the editor has a button per category, and every other tag is
+still found by the search. The list is kept on the server (`categories.py`);
+Claude reads and sets it with `get_categories` and `set_categories`. The rules are in
 `frontend/src/browse.ts` and Friday's `cook/logic/Browse.kt`; change them
 together.
 

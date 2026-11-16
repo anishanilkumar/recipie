@@ -15,7 +15,7 @@ import logging
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import auth_web, db, events, pantry, photos, service, shares, shopping
+from . import auth_web, categories, db, events, pantry, photos, service, shares, shopping
 from .config import settings
 from .models import DishStatus, EventDoc, RecipeDoc
 
@@ -343,6 +343,10 @@ def recipes_router() -> APIRouter:
     return r
 
 
+class CategoriesBody(BaseModel):
+    categories: list[str] = Field(max_length=50)
+
+
 class WebPhotoBody(BaseModel):
     id: str = Field(min_length=1, max_length=64)
     record: dict
@@ -408,6 +412,19 @@ def create_app() -> FastAPI:
     def service_pull(since: int = 0, caller: str = Depends(service.require_service)):
         rows, cursor, more = db.changes_since(max(0, since))
         return {"cursor": cursor, "more": more, "changes": rows}
+
+    @app.get("/api/categories")
+    def get_categories(user: str = Depends(require_user)):
+        return {"categories": categories.get()}
+
+    @app.put("/api/categories")
+    def put_categories(body: CategoriesBody, user: str = Depends(require_user)):
+        if settings().demo:
+            raise HTTPException(403, "Categories can't be changed in the demo.")
+        try:
+            return {"categories": categories.put(body.categories)}
+        except ValueError as e:
+            raise HTTPException(422, str(e))
 
     @app.get("/api/photos")
     def list_photos(user: str = Depends(require_user)):

@@ -1129,3 +1129,8 @@ ul, ol { list-style: none; }
 }
 .photo-pick-credit:first-of-type { color: var(--ink-dim); }
 .photo-pick-licence { margin-top: 0; }
+
+/* ---- Categories ------------------------------------------------------------ */
+.tag-chip-edit { color: var(--arc); border-style: dashed; }
+.tag-strip-wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding-inline: 0; }
+.categories-edit { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem 0; }

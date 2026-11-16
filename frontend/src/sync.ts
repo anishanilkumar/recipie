@@ -13,7 +13,7 @@
 //     the list of events, which says which recipes are on an event's menu.
 
 import { useSyncExternalStore } from "react";
-import { ARRIVED_KEY, db, getKV, PANTRY_KEY, setKV } from "./db";
+import { ARRIVED_KEY, CATEGORIES_KEY, db, getKV, PANTRY_KEY, setKV } from "./db";
 import type { EventSummary, LocalRecipe, PantrySnapshot, ServerRow } from "./types";
 import { newId } from "./types";
 import { refreshPhotos } from "./photos";
@@ -177,6 +177,19 @@ async function refreshPantry(): Promise<void> {
   await setKV(PANTRY_KEY, snap);
 }
 
+export async function refreshCategories(): Promise<void> {
+  const { categories } = await api<{ categories: string[] }>("/api/categories");
+  await setKV(CATEGORIES_KEY, categories);
+}
+
+/** Replace the household's categories; online only. */
+export async function saveCategories(names: string[]): Promise<void> {
+  const { categories } = await api<{ categories: string[] }>("/api/categories", {
+    method: "PUT", body: JSON.stringify({ categories: names }),
+  });
+  await setKV(CATEGORIES_KEY, categories);
+}
+
 export const EVENTS_KEY = "events";
 
 async function refreshEvents(): Promise<void> {
@@ -220,6 +233,7 @@ async function runOnce(): Promise<void> {
     await refreshEvents();
     // Which recipes have photos; only pictures, so a failure keeps the last list.
     await refreshPhotos().catch(() => undefined);
+    await refreshCategories().catch(() => undefined);
     await setKV("me", await api<{ username: string; demo: boolean }>("/api/me"));
     const now = new Date().toISOString();
     await setKV("lastSyncedAt", now);

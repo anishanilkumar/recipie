@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { hasTag, isNew, sortRecipes, tagChoices, type Sort } from "../browse";
+import { categoryChoices, hasTag, isNew, sortRecipes, type Sort } from "../browse";
 import { reason, STATUS_LABEL, type Status } from "../cookable";
 import { Lid } from "../components/Lid";
 import { Thumb } from "../components/RecipePhoto";
 import { usePhotos } from "../photos";
 import { SyncPill } from "../components/SyncPill";
+import { HttpError, saveCategories } from "../sync";
 import { ago, minutes } from "../format";
-import { useArrived, useMe, useOpened, usePantry, useRecipeEvents, useRecipes } from "../hooks";
+import { useArrived, useCategories, useMe, useOpened, usePantry, useRecipeEvents, useRecipes } from "../hooks";
 
 type Filter = "all" | Status;
 
@@ -35,7 +36,9 @@ export function Home() {
       !(hideEvents && byRecipe.has(recipe.id)) && (showArchived || !recipe.doc.archived)),
     [recipes, hideEvents, byRecipe, showArchived],
   );
-  const tags = useMemo(() => tagChoices(listable.map((r) => r.recipe)), [listable]);
+  const categories = useCategories();
+  const [editingCategories, setEditingCategories] = useState(false);
+  const tags = useMemo(() => categoryChoices(listable.map((r) => r.recipe), categories), [listable, categories]);
   // A remembered tag nobody uses any more (renamed, or its recipes hidden) shouldn't empty the list.
   const activeTag = tag && tags.some((t) => t.key === tag) ? tag : null;
   // The tag narrows the counts too: "ready tonight" among the desserts.
@@ -147,17 +150,20 @@ export function Home() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </label>
-        {tags.length ? (
-          <div className="tag-strip" role="group" aria-label="Show one kind">
-            {tags.map((t) => (
-              <button key={t.key} className={`tag-chip${activeTag === t.key ? " is-on" : ""}`}
-                aria-pressed={activeTag === t.key} onClick={() => chooseTag(activeTag === t.key ? null : t.key)}>
-                {t.label}
-                <span className="tag-chip-n">{t.count}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
+        <div className="tag-strip" role="group" aria-label="Show one category">
+          {tags.map((t) => (
+            <button key={t.key} className={`tag-chip${activeTag === t.key ? " is-on" : ""}`}
+              aria-pressed={activeTag === t.key} onClick={() => chooseTag(activeTag === t.key ? null : t.key)}>
+              {t.label}
+              <span className="tag-chip-n">{t.count}</span>
+            </button>
+          ))}
+          <button className="tag-chip tag-chip-edit" aria-expanded={editingCategories}
+            onClick={() => setEditingCategories((x) => !x)}>
+            {editingCategories ? "Done" : "Edit"}
+          </button>
+        </div>
+        {editingCategories ? <CategoriesEditor categories={categories} onDone={() => setEditingCategories(false)} /> : null}
         <div className="search-tools">
           <span className="sort-switch" role="group" aria-label="Order">
             {(["recent", "az"] as const).map((s) => (
@@ -234,6 +240,37 @@ export function Home() {
         </svg>
       </Link>
     </div>
+  );
+}
+
+/** The household's category row, as one line of names. Saved for every device; online only. */
+function CategoriesEditor({ categories, onDone }: { categories: string[]; onDone: () => void }) {
+  const [text, setText] = useState(categories.join(", "));
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await saveCategories(text.split(",").map((t) => t.trim()).filter(Boolean));
+      onDone();
+    } catch (e) {
+      setError(e instanceof HttpError ? (typeof e.detail === "string" ? e.detail : "The server wouldn't save that.")
+        : "No connection. Categories are saved on the server; try again when you're online.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="categories-edit" onSubmit={(e) => { e.preventDefault(); void save(); }}>
+      <label className="field">
+        <span>Categories, in order, separated by commas</span>
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Baking, Rice cooker, Curry" />
+      </label>
+      <p className="edit-help">A recipe is in a category when it has the tag of the same name; the editor has a button for each.</p>
+      {error ? <p className="form-error" role="alert">{error}</p> : null}
+      <button className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Save categories"}</button>
+    </form>
   );
 }
 

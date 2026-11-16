@@ -12,7 +12,7 @@ import os
 
 from mcp.server.fastmcp import FastMCP
 
-from . import cookable, db, events, pantry, shares
+from . import categories, cookable, db, events, pantry, shares
 from .models import EventDoc, RecipeDoc
 
 INSTRUCTIONS = """\
@@ -21,6 +21,10 @@ the user's phone, which works offline in the kitchen.
 
 Only save, change or delete a recipe when the user asks for it. Talking about
 a recipe is not an instruction to store it.
+
+The recipe list's categories (get_categories) are tags with a place in its
+row: a recipe is in "Rice cooker" when it has the tag "rice cooker". When
+saving a recipe, give it the tags of the categories it belongs to.
 
 Archived recipes are put away: kept, but left out of list_recipes and
 whats_cookable, and not to be suggested. archive_recipe puts one away or
@@ -204,6 +208,18 @@ def register(mcp: FastMCP) -> FastMCP:
             raise ValueError(f"No recipe has id {id!r}.")
         row = db.save(row["doc"], recipe_id=id, user="claude")
         return {"restored": row["id"], "title": row["doc"]["title"]}
+
+    @mcp.tool()
+    def get_categories() -> list[str]:
+        """The household's recipe categories, the row of kinds on the recipe list.
+        A recipe is in a category when it has the tag of the same name."""
+        return categories.get()
+
+    @mcp.tool()
+    def set_categories(names: list[str]) -> list[str]:
+        """Replace the category list (in the order given). Only when asked. To
+        put a recipe in a category, add the category's name to its tags."""
+        return categories.put(names)
 
     @mcp.tool()
     def archive_recipe(id: str, archived: bool = True) -> dict:

@@ -46,6 +46,10 @@ export const OPENED_KEY = "opened";
  */
 export const ARRIVED_KEY = "arrived";
 
+/** The household's categories (categories.py), as of the last sync. */
+export const CATEGORIES_KEY = "categories";
+export const DEFAULT_CATEGORIES = ["Baking", "Rice cooker", "Curry", "Oven", "Noodles"];
+
 export async function markOpened(id: string): Promise<void> {
   await db.transaction("rw", db.kv, async () => {
     const opened = (await getKV<Record<string, string>>(OPENED_KEY)) ?? {};

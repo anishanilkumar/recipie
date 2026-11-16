@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { assess, type Verdict } from "./cookable";
-import { ARRIVED_KEY, db, getKV, getPantry, OPENED_KEY } from "./db";
+import { ARRIVED_KEY, CATEGORIES_KEY, DEFAULT_CATEGORIES, db, getKV, getPantry, OPENED_KEY } from "./db";
 import { EVENTS_KEY } from "./sync";
 import type { EventSummary, LocalRecipe, PantrySnapshot } from "./types";
 
@@ -29,6 +29,11 @@ export function useRecipes(): RecipeWithVerdict[] | undefined {
 /** When each recipe was last opened on this device. */
 export function useOpened(): Record<string, string> | undefined {
   return useLiveQuery(async () => (await getKV<Record<string, string>>(OPENED_KEY)) ?? {}, []);
+}
+
+/** The household's categories; the starting five until the first sync. */
+export function useCategories(): string[] {
+  return useLiveQuery(async () => (await getKV<string[]>(CATEGORIES_KEY)) ?? DEFAULT_CATEGORIES, []) ?? DEFAULT_CATEGORIES;
 }
 
 /** When each recipe first reached this device by sync. */
