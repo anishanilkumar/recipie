@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import auth_web, db, events, pantry, service, shares, shopping
+from . import auth_web, db, events, pantry, photos, service, shares, shopping
 from .config import settings
 from .models import DishStatus, EventDoc, RecipeDoc
 
@@ -295,7 +295,62 @@ def recipes_router() -> APIRouter:
             # Usually a recipe made on this phone that hasn't synced yet.
             raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
 
+    # --- photos (photos.py) ---------------------------------------------------
+
+    def no_demo():
+        if settings().demo:
+            raise HTTPException(403, "Photos can't be changed in the demo.")
+
+    @r.put("/{recipe_id}/photo")
+    async def put_photo(recipe_id: str, request: Request, size: str = "full", keep: bool = False,
+                        user: str = Depends(require_user)):
+        """A photo of the plate, as a JPEG body. keep=1: only if there's no photo yet."""
+        no_demo()
+        data = await request.body()
+        try:
+            return photos.put_own(recipe_id, data, size=size, keep_existing=keep, user=user)
+        except photos.NotFound:
+            raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+
+    @r.delete("/{recipe_id}/photo/{kind}")
+    def delete_photo(recipe_id: str, kind: str):
+        no_demo()
+        try:
+            photos.remove(recipe_id, kind)
+        except photos.NotFound:
+            raise HTTPException(404, "No such photo.")
+        return photos.of(recipe_id)
+
+    @r.get("/{recipe_id}/photo/search")
+    def search_photos(recipe_id: str, q: str = ""):
+        no_demo()
+        row = db.get(recipe_id)
+        if row is None or row["deleted"]:
+            raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
+        try:
+            return photos.search_for_recipe(row["doc"].get("title", ""), q or None)
+        except photos.Unavailable as e:
+            raise HTTPException(502, str(e) or "The image search didn't answer.")
+
+    @r.post("/{recipe_id}/photo/web")
+    def choose_web_photo(recipe_id: str, body: WebPhotoBody, user: str = Depends(require_user)):
+        no_demo()
+        try:
+            return photos.set_web(recipe_id, body.id, user=user)
+        except photos.NotFound:
+            raise HTTPException(404, "That recipe or picture isn't there any more.")
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+        except photos.Unavailable as e:
+            raise HTTPException(502, str(e) or "The image search didn't answer.")
+
     return r
+
+
+class WebPhotoBody(BaseModel):
+    id: str = Field(min_length=1, max_length=64)
 
 
 def create_app() -> FastAPI:
@@ -356,6 +411,22 @@ def create_app() -> FastAPI:
     def service_pull(since: int = 0, caller: str = Depends(service.require_service)):
         rows, cursor, more = db.changes_since(max(0, since))
         return {"cursor": cursor, "more": more, "changes": rows}
+
+    @app.get("/api/photos")
+    def list_photos(user: str = Depends(require_user)):
+        return {"photos": photos.listing()}
+
+    @app.get("/api/photos/{recipe_id}/{kind}/{size}")
+    def get_photo(recipe_id: str, kind: str, size: str, user: str = Depends(require_user)):
+        try:
+            found = photos.read(recipe_id, kind, size)
+        except photos.NotFound:
+            found = None
+        if found is None:
+            raise HTTPException(404, "No photo.")
+        data, mime = found
+        # The URL carries ?v=; a new photo gets a new v, so these bytes never change.
+        return Response(data, media_type=mime, headers={"Cache-Control": "private, max-age=31536000, immutable"})
 
     @app.get("/api/pantry")
     def get_pantry(user: str = Depends(require_user)):

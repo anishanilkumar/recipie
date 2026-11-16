@@ -13,9 +13,10 @@
 //     the list of events, which says which recipes are on an event's menu.
 
 import { useSyncExternalStore } from "react";
-import { db, getKV, PANTRY_KEY, setKV } from "./db";
+import { ARRIVED_KEY, db, getKV, PANTRY_KEY, setKV } from "./db";
 import type { EventSummary, LocalRecipe, PantrySnapshot, ServerRow } from "./types";
 import { newId } from "./types";
+import { refreshPhotos } from "./photos";
 
 export type SyncPhase = "idle" | "syncing" | "offline" | "signed-out" | "error";
 
@@ -142,11 +143,21 @@ async function pull(): Promise<void> {
   for (;;) {
     const page = await api<{ cursor: number; more: boolean; changes: ServerRow[] }>(`/api/sync?since=${cursor}`);
     await db.transaction("rw", db.recipes, db.kv, async () => {
+      const arrived: string[] = [];
       for (const row of page.changes) {
         const local = await db.recipes.get(row.id);
         if (local?.dirty) continue;
         if (row.deleted) await db.recipes.delete(row.id);
-        else await db.recipes.put(fromServer(row));
+        else {
+          if (!local && cursor > 0) arrived.push(row.id);
+          await db.recipes.put(fromServer(row));
+        }
+      }
+      if (arrived.length) {
+        const map = (await getKV<Record<string, string>>(ARRIVED_KEY)) ?? {};
+        const now = new Date().toISOString();
+        for (const id of arrived) map[id] = now;
+        await setKV(ARRIVED_KEY, map);
       }
       await setKV("cursor", page.cursor);
     });
@@ -207,6 +218,8 @@ async function runOnce(): Promise<void> {
     await pull();
     await refreshPantry();
     await refreshEvents();
+    // Which recipes have photos; only pictures, so a failure keeps the last list.
+    await refreshPhotos().catch(() => undefined);
     await setKV("me", await api<{ username: string; demo: boolean }>("/api/me"));
     const now = new Date().toISOString();
     await setKV("lastSyncedAt", now);

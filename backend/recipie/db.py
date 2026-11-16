@@ -128,6 +128,21 @@ CREATE TABLE IF NOT EXISTS recipe_shares (
     enabled     INTEGER NOT NULL DEFAULT 1,
     created_at  TEXT NOT NULL
 );
+
+-- A recipe's photos (photos.py): "own", a photo of the plate, and "web", a
+-- stand-in found on the web, with its credit. Own is shown when there is one.
+-- Like shares, kept out of the recipes row: a photo never bumps a rev.
+CREATE TABLE IF NOT EXISTS recipe_photos (
+    recipe_id   TEXT NOT NULL,
+    kind        TEXT NOT NULL,
+    v           INTEGER NOT NULL,
+    mime        TEXT NOT NULL,
+    thumb_mime  TEXT NOT NULL DEFAULT '',
+    credit      TEXT NOT NULL DEFAULT '',
+    updated_at  TEXT NOT NULL,
+    updated_by  TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (recipe_id, kind)
+);
 """
 
 

@@ -1,10 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { hasTag, isNew, sortRecipes, tagChoices, type Sort } from "../browse";
 import { reason, STATUS_LABEL, type Status } from "../cookable";
 import { Lid } from "../components/Lid";
+import { Thumb } from "../components/RecipePhoto";
+import { usePhotos } from "../photos";
 import { SyncPill } from "../components/SyncPill";
 import { ago, minutes } from "../format";
-import { useMe, usePantry, useRecipeEvents, useRecipes } from "../hooks";
+import { useArrived, useMe, useOpened, usePantry, useRecipeEvents, useRecipes } from "../hooks";
 
 type Filter = "all" | Status;
 
@@ -14,14 +17,27 @@ export function Home() {
   const me = useMe();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>(() => (localStorageGet("filter") as Filter) || "all");
+  const [sort, setSort] = useState<Sort>(() => (localStorageGet("sort") === "az" ? "az" : "recent"));
+  const [tag, setTag] = useState<string | null>(() => localStorageGet("tag") || null);
+  const opened = useOpened();
+  const arrived = useArrived();
+  const photos = usePhotos();
   const byRecipe = useRecipeEvents();
   // Big-batch recipes made for an event ("Rajma (30)") crowd out the everyday
   // ones; this takes them off the list, and out of the counts, until wanted.
   const [hideEvents, setHideEvents] = useState(() => localStorageGet("hideEvents") === "1");
   const eventCount = useMemo(() => (recipes ?? []).filter(({ recipe }) => byRecipe.has(recipe.id)).length, [recipes, byRecipe]);
-  const visible = useMemo(
+  const listable = useMemo(
     () => (recipes ?? []).filter(({ recipe }) => !(hideEvents && byRecipe.has(recipe.id))),
     [recipes, hideEvents, byRecipe],
+  );
+  const tags = useMemo(() => tagChoices(listable.map((r) => r.recipe)), [listable]);
+  // A remembered tag nobody uses any more (renamed, or its recipes hidden) shouldn't empty the list.
+  const activeTag = tag && tags.some((t) => t.key === tag) ? tag : null;
+  // The tag narrows the counts too: "ready tonight" among the desserts.
+  const visible = useMemo(
+    () => listable.filter(({ recipe }) => !activeTag || hasTag(recipe, activeTag)),
+    [listable, activeTag],
   );
 
   const counts = useMemo(() => {
@@ -35,17 +51,26 @@ export function Home() {
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return visible.filter(({ recipe, verdict }) => {
+    const matched = visible.filter(({ recipe, verdict }) => {
       if (filter !== "all" && verdict.status !== filter) return false;
       if (!q) return true;
       const d = recipe.doc;
       return [d.title, ...(d.tags ?? []), ...d.ingredients.map((i) => i.name)].some((s) => s.toLowerCase().includes(q));
     });
-  }, [visible, filter, query]);
+    return sortRecipes(matched, sort, opened ?? {}, arrived ?? {});
+  }, [visible, filter, query, sort, opened, arrived]);
 
   const choose = (f: Filter) => {
     setFilter(f);
     localStorageSet("filter", f);
+  };
+  const chooseTag = (t: string | null) => {
+    setTag(t);
+    localStorageSet("tag", t ?? "");
+  };
+  const chooseSort = (s: Sort) => {
+    setSort(s);
+    localStorageSet("sort", s);
   };
   const toggleEvents = (hide: boolean) => {
     setHideEvents(hide);
@@ -114,13 +139,33 @@ export function Home() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </label>
-        {eventCount ? (
-          <button className="link-btn search-tool" aria-pressed={hideEvents} onClick={() => toggleEvents(!hideEvents)}>
-            {hideEvents
-              ? `Show ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`
-              : `Hide ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`}
-          </button>
+        {tags.length ? (
+          <div className="tag-strip" role="group" aria-label="Show one kind">
+            {tags.map((t) => (
+              <button key={t.key} className={`tag-chip${activeTag === t.key ? " is-on" : ""}`}
+                aria-pressed={activeTag === t.key} onClick={() => chooseTag(activeTag === t.key ? null : t.key)}>
+                {t.label}
+                <span className="tag-chip-n">{t.count}</span>
+              </button>
+            ))}
+          </div>
         ) : null}
+        <div className="search-tools">
+          <span className="sort-switch" role="group" aria-label="Order">
+            {(["recent", "az"] as const).map((s) => (
+              <button key={s} className={`link-btn${sort === s ? " is-on" : ""}`} aria-pressed={sort === s} onClick={() => chooseSort(s)}>
+                {s === "recent" ? "Recent" : "A–Z"}
+              </button>
+            ))}
+          </span>
+          {eventCount ? (
+            <button className="link-btn search-tool" aria-pressed={hideEvents} onClick={() => toggleEvents(!hideEvents)}>
+              {hideEvents
+                ? `Show ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`
+                : `Hide ${eventCount} event ${eventCount === 1 ? "recipe" : "recipes"}`}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {recipes === undefined ? null : recipes.length === 0 ? (
@@ -134,7 +179,7 @@ export function Home() {
       ) : shown.length === 0 ? (
         <div className="empty">
           <p className="empty-title">Nothing matches.</p>
-          <button className="btn" onClick={() => { setQuery(""); choose("all"); toggleEvents(false); }}>
+          <button className="btn" onClick={() => { setQuery(""); choose("all"); chooseTag(null); toggleEvents(false); }}>
             Show all recipes
           </button>
         </div>
@@ -148,7 +193,10 @@ export function Home() {
                 <Link to={`/r/${recipe.id}`} className="row">
                   <Lid verdict={verdict} />
                   <span className="row-body">
-                    <span className="row-title">{d.title}</span>
+                    <span className="row-title">
+                      {isNew(recipe.id, opened ?? {}, arrived ?? {}) ? <span className="row-new">New</span> : null}
+                      {d.title}
+                    </span>
                     <span className={`row-why why-${verdict.status}`}>{reason(verdict)}</span>
                     {byRecipe.has(recipe.id) ? (
                       <span className="row-events">{byRecipe.get(recipe.id)!.map((e) => e.title).join(" · ")}</span>
@@ -158,6 +206,7 @@ export function Home() {
                     {time ? minutes(time) : null}
                     {recipe.dirty ? <span className="unsent" title="Not synced yet">unsent</span> : null}
                   </span>
+                  <Thumb recipeId={recipe.id} title={d.title} photos={photos[recipe.id]} />
                 </Link>
               </li>
             );

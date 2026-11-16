@@ -37,6 +37,23 @@ export async function setKV(key: string, value: unknown): Promise<void> {
 export const PANTRY_KEY = "pantry";
 export const getPantry = () => getKV<PantrySnapshot>(PANTRY_KEY);
 
+/** When each recipe was last opened on this device (recipe id -> ISO time). Never synced. */
+export const OPENED_KEY = "opened";
+
+/**
+ * When each recipe first reached this device by sync (recipe id -> ISO time).
+ * The first sync of a fresh install records nothing, so nothing starts "new".
+ */
+export const ARRIVED_KEY = "arrived";
+
+export async function markOpened(id: string): Promise<void> {
+  await db.transaction("rw", db.kv, async () => {
+    const opened = (await getKV<Record<string, string>>(OPENED_KEY)) ?? {};
+    opened[id] = new Date().toISOString();
+    await setKV(OPENED_KEY, opened);
+  });
+}
+
 /** Save an edit locally; the next sync sends it. */
 export async function saveLocal(id: string | null, doc: RecipeDoc): Promise<string> {
   const recipeId = id ?? newId();

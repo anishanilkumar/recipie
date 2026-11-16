@@ -30,6 +30,8 @@ class Settings:
     friday_issuer: str
     friday_client_id: str
     pantry_ttl_seconds: int
+    # Recipe photos (photos.py): files beside the database, rows in it.
+    photo_dir: str
     # Public demo (recipes-demo): no login, a made-up pantry, and nothing a
     # visitor does is stored. See web.py.
     demo: bool
@@ -52,6 +54,8 @@ def settings() -> Settings:
         friday_issuer=os.environ.get("RECIPIE_FRIDAY_ISSUER", "").rstrip("/"),
         friday_client_id=os.environ.get("RECIPIE_FRIDAY_CLIENT_ID", ""),
         pantry_ttl_seconds=int(os.environ.get("RECIPIE_PANTRY_TTL", "60")),
+        photo_dir=os.environ.get("RECIPIE_PHOTOS", "")
+        or os.path.join(os.path.dirname(os.path.abspath(os.environ.get("RECIPIE_DB", "recipie.db"))), "photos"),
         demo=os.environ.get("RECIPIE_DEMO", "") == "1",
     )
     # The demo is public. It must never fall back to the real Grocy.

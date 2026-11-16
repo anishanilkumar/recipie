@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { assess, type Verdict } from "./cookable";
-import { db, getKV, getPantry } from "./db";
+import { ARRIVED_KEY, db, getKV, getPantry, OPENED_KEY } from "./db";
 import { EVENTS_KEY } from "./sync";
 import type { EventSummary, LocalRecipe, PantrySnapshot } from "./types";
 
@@ -24,6 +24,16 @@ export function useRecipes(): RecipeWithVerdict[] | undefined {
       .map((recipe) => ({ recipe, verdict: assess(recipe.doc, stock) }))
       .sort((a, b) => a.recipe.doc.title.localeCompare(b.recipe.doc.title));
   }, [recipes, pantry]);
+}
+
+/** When each recipe was last opened on this device. */
+export function useOpened(): Record<string, string> | undefined {
+  return useLiveQuery(async () => (await getKV<Record<string, string>>(OPENED_KEY)) ?? {}, []);
+}
+
+/** When each recipe first reached this device by sync. */
+export function useArrived(): Record<string, string> | undefined {
+  return useLiveQuery(async () => (await getKV<Record<string, string>>(ARRIVED_KEY)) ?? {}, []);
 }
 
 export function useRecipe(id: string | undefined): LocalRecipe | null | undefined {

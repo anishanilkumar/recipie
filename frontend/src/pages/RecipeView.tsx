@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { assess, ingredientState, type Verdict } from "../cookable";
 import { Lid } from "../components/Lid";
+import { PhotoPanel, RecipePhoto } from "../components/RecipePhoto";
+import { usePhotos } from "../photos";
 import { Qty } from "../components/Qty";
 import { StepIngredients } from "../components/StepIngredients";
-import { deleteLocal } from "../db";
+import { deleteLocal, markOpened } from "../db";
 import { clock, minutes } from "../format";
 import { usePantry, useRecipe } from "../hooks";
 import { getRecipeShare, setRecipeShare, type RecipeShareState } from "../recipeShare";
@@ -19,6 +21,12 @@ export function RecipeView() {
   const [servings, setServings] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const photos = usePhotos();
+  // The list's "Recent" order is by when a recipe was last opened here.
+  useEffect(() => {
+    if (id) void markOpened(id);
+  }, [id]);
 
   const stock = pantry?.stock ?? null;
   const verdict = useMemo(() => (recipe ? assess(recipe.doc, stock) : null), [recipe, stock]);
@@ -59,6 +67,8 @@ export function RecipeView() {
       <aside className="recipe-side">
       <BackLink />
 
+      {recipe ? <RecipePhoto recipeId={recipe.id} photos={photos[recipe.id]} /> : null}
+
       <header className="recipe-head">
         <h1 className="recipe-title">{d.title}</h1>
         {d.description ? <p className="recipe-desc">{d.description}</p> : null}
@@ -86,11 +96,13 @@ export function RecipeView() {
 
       <footer className="recipe-actions">
         <Link to={`/r/${recipe.id}/edit`} className="btn">Edit</Link>
-        <button className="btn" aria-expanded={sharing} onClick={() => setSharing((x) => !x)}>Share</button>
+        <button className="btn" aria-expanded={sharing} onClick={() => { setSharing((x) => !x); setPhotoOpen(false); }}>Share</button>
+        <button className="btn" aria-expanded={photoOpen} onClick={() => { setPhotoOpen((x) => !x); setSharing(false); }}>Photo</button>
         <button className={`btn ${confirmDelete ? "btn-danger" : "btn-quiet"}`} onClick={remove}>
           {confirmDelete ? "Tap again to delete" : "Delete"}
         </button>
         {sharing ? <SharePanel recipeId={recipe.id} title={d.title} /> : null}
+        {photoOpen ? <PhotoPanel recipeId={recipe.id} photos={photos[recipe.id]} /> : null}
       </footer>
       </aside>
 
@@ -186,7 +198,7 @@ function SharePanel({ recipeId, title }: { recipeId: string; title: string }) {
   const [confirmRotate, setConfirmRotate] = useState(false);
   // The panel opens under the buttons, often below the fold: bring it into view.
   const panel = useRef<HTMLElement>(null);
-  useEffect(() => panel.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), [share, error]);
+  useEffect(() => { panel.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, [share, error]);
 
   const fail = (e: unknown) => {
     if (e instanceof HttpError) {

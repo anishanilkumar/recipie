@@ -30,6 +30,20 @@ export default defineConfig({
         // would make signing in impossible.
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/auth\//, /^\/api\//],
+        // Recipe photos, kept as they're seen so they show offline. Each URL
+        // carries ?v= and a new photo gets a new one, so cache-first is safe.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) =>
+              url.origin === self.location.origin && /^\/api\/photos\/[^/]+\/(own|web)\/(full|thumb)$/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "recipe-photos",
+              expiration: { maxEntries: 500 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],

@@ -39,6 +39,45 @@ offline (`frontend/src/cookable.ts`), and in Kotlin for the Android app
 (`android/.../logic/Cookable.kt`). All three are tested against
 `shared/cookable-cases.json`. Change them together.
 
+## The list
+
+A recipe that reaches a device by sync (added by Claude, or on another phone)
+is marked **New** and sits at the top until it's opened there. The first sync
+of a fresh install marks nothing new.
+
+**Recent** (the default) orders recipes by when they were last opened on this
+device (a recipe never opened here goes by when it was last saved, so one
+Claude just added shows near the top); **A–Z** is the other order. Opens are
+kept on the device only and never synced, so each phone or browser has its
+own order. Under the search, a row of tags (most-used first; "Kerala" and
+"kerala", "make-ahead" and "make ahead" count as one) narrows the list to one
+kind, and the Ready / Almost / Not tonight counts with it. The rules are in
+`frontend/src/browse.ts` and Friday's `cook/logic/Browse.kt`; change them
+together.
+
+## Photos
+
+Each recipe has two photo slots (`backend/recipie/photos.py`), kept outside
+the recipe row so a photo never bumps a rev:
+
+- **Own:** the plate. After cook mode, Friday's "Photograph the plate" logs the
+  meal in Foodlog and also sends the photo here (plus a small thumbnail made on
+  the phone). The first one stays; a later one replaces it only after
+  "Remove plate photo".
+- **Web stand-in:** until there's an own photo. **Photo** on a recipe searches
+  [Openverse](https://openverse.org) (openly licensed pictures, mostly Flickr
+  and Wikimedia Commons), starting from the title and shortening it until
+  something turns up. The picked picture's credit (title, creator, licence,
+  source page) is read from Openverse by the server and shown, linked, under
+  the photo. Openverse's anonymous limit is 200 searches a day.
+
+The own photo shows when there is one. A recipe with neither gets its first
+letter in the list. `/api/photos` (with every sync) says which exist; each
+picture's URL carries `?v=`, so phones and the service worker cache them for
+good and they show offline. Files live in `RECIPIE_PHOTOS` (default: `photos/`
+beside the database). Share links and the demo don't show or change photos;
+Claude can't set them yet.
+
 ## Architecture
 
 ```
