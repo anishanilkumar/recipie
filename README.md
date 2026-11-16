@@ -150,9 +150,11 @@ to the same cases.
 Mealplan (`../mealplan`) plans meals from these recipes and keeps a copy.
 It reads `GET /api/service/sync?since=N`, the same feed as `/api/sync`, with
 a bearer token it gets from Kanidm by the client-credentials grant, as its
-own OAuth2 client; nobody signs in (`backend/recipie/service.py`). The token
-is checked offline with the MCP server's verifier, and opens only that GET:
-not `/api/sync`, not a write. Unconfigured, the endpoint answers 503.
+own OAuth2 client; nobody signs in (`backend/recipie/service.py`). Kanidm's
+tokens for a confidential client are opaque, so Recipie asks Kanidm about
+each one (introspection, as `recipie-web`), keeps the answer until the token
+expires, and lets in only the clients it names. The token opens only that
+GET: not `/api/sync`, not a write. Unconfigured, the endpoint answers 503.
 
 Every save or delete also sends an empty `recipes.changed` over NATS (when
 `RECIPIE_NATS_URL` is set), so the copy is re-read at once rather than at
@@ -203,7 +205,7 @@ npm test
 | `RECIPIE_PUBLIC_URL` | web | e.g. `https://recipes.anishsheela.com` |
 | `RECIPIE_OIDC_ISSUER` / `_CLIENT_ID` / `_CLIENT_SECRET` | web | Browser login |
 | `RECIPIE_MCP_OIDC_ISSUER` / `_JWKS_URI` / `_AUDIENCE` / `_SCOPES` | mcp | Bearer token checks |
-| `RECIPIE_SERVICE_OIDC_ISSUER` / `_JWKS_URI` / `_AUDIENCE` / `_SCOPES` | web | Service tokens (Mealplan) for `/api/service/sync` |
+| `RECIPIE_SERVICE_INTROSPECT_URL` / `RECIPIE_SERVICE_CLIENTS` | web | Service tokens (Mealplan) for `/api/service/sync`: Kanidm's introspection endpoint, and the client ids let in |
 | `RECIPIE_NATS_URL` / `_NATS_USER` / `_NATS_PASSWORD_FILE` | both | `pantry.changed` in, `recipes.changed` out |
 | `GROCY_API_URL` / `GROCY_API_KEY` | both | Pantry reads |
 
