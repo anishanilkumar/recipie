@@ -18,6 +18,13 @@ from pydantic import BaseModel, Field, model_validator
 # optional: garnish or "if you have it"; never affects whether you can cook.
 Role = Literal["main", "minor", "optional"]
 
+# What a step asks of the cook, for planning a bake (timing.py):
+# prep:    done ahead, waiting on its own (butter out to room temperature).
+# active:  hands on (mix, fold, fill the tins).
+# passive: waiting while it happens (in the oven, resting the batter).
+# setting: after it's done, before it can go (overnight on the rack, in the fridge).
+StepKind = Literal["prep", "active", "passive", "setting"]
+
 
 def new_id() -> str:
     return uuid.uuid4().hex
@@ -74,6 +81,12 @@ class Step(BaseModel):
     id: str = Field(default_factory=new_id)
     text: str = Field(min_length=1, max_length=2000)
     timer_seconds: int | None = Field(default=None, ge=1, le=24 * 3600)
+    kind: StepKind | None = Field(
+        default=None, description="prep (ahead, on its own), active (hands on), passive (waiting: oven, resting), setting (after: cooling overnight, fridge)")
+    minutes: int | None = Field(
+        default=None, ge=1, le=3 * 24 * 60,
+        description="How long the step takes, when that isn't its timer: an active step's estimate, or an overnight setting that shouldn't ring")
+    oven: bool = Field(default=False, description="The step occupies the oven")
     ingredient_ids: list[str] = Field(
         default_factory=list, max_length=50,
         description="Ids of the ingredients this step uses; cook mode shows their measurements on the step",

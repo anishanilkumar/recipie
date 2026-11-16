@@ -27,10 +27,18 @@ export interface Ingredient extends PantryLinks {
   substitutes?: Substitute[];
 }
 
+/** What a step asks of the cook (timing.ts): ahead, hands on, waiting, or after. */
+export type StepKind = "prep" | "active" | "passive" | "setting";
+
 export interface Step {
   id: string;
   text: string;
   timer_seconds?: number | null;
+  kind?: StepKind | null;
+  /** How long it takes when that isn't the timer: an active step's estimate, an overnight setting. */
+  minutes?: number | null;
+  /** The step occupies the oven. */
+  oven?: boolean;
   /** Ingredients this step uses; cook mode shows their measurements on the step. */
   ingredient_ids?: string[];
 }

@@ -1,0 +1,223 @@
+{
+  "_comment": "Run by backend/tests/test_timing.py, frontend/src/timing.test.ts and Friday's cook LogicTest. A step's length is its `minutes` when given, else its timer rounded up to a whole minute, else 0. Steps without a kind count only in `unclassified`. bake = the active and passive steps before the first setting step: start to finish, leaving out prep and setting. after = the active and passive steps after a setting step (wrap the loaf next morning); they count in active and passive but not in bake. oven = the steps marked oven.",
+  "cases": [
+    {
+      "name": "a recipe without kinds has only unclassified time",
+      "steps": [
+        {
+          "text": "Fry the onions",
+          "timer_seconds": 600
+        },
+        {
+          "text": "Add the rest"
+        }
+      ],
+      "expect": {
+        "prep": 0,
+        "active": 0,
+        "passive": 0,
+        "setting": 0,
+        "bake": 0,
+        "oven": 0,
+        "unclassified": 10,
+        "classified": false,
+        "after": 0
+      }
+    },
+    {
+      "name": "minutes win over the timer, and a timer rounds up",
+      "steps": [
+        {
+          "text": "Mix",
+          "kind": "active",
+          "minutes": 15,
+          "timer_seconds": 60
+        },
+        {
+          "text": "Whisk",
+          "kind": "active",
+          "timer_seconds": 90
+        }
+      ],
+      "expect": {
+        "prep": 0,
+        "active": 17,
+        "passive": 0,
+        "setting": 0,
+        "bake": 17,
+        "oven": 0,
+        "unclassified": 0,
+        "classified": true,
+        "after": 0
+      }
+    },
+    {
+      "name": "banana bread: prep and setting stay out of the bake",
+      "steps": [
+        {
+          "text": "Eggs and butter out to room temperature",
+          "kind": "prep",
+          "minutes": 60
+        },
+        {
+          "text": "Mash the bananas, mix the batter",
+          "kind": "active",
+          "minutes": 20
+        },
+        {
+          "text": "Fill the tins",
+          "kind": "active",
+          "minutes": 5
+        },
+        {
+          "text": "Bake",
+          "kind": "passive",
+          "timer_seconds": 3600,
+          "oven": true
+        },
+        {
+          "text": "Out of the tins, onto the rack",
+          "kind": "active",
+          "minutes": 5
+        },
+        {
+          "text": "Cool overnight on the rack",
+          "kind": "setting",
+          "minutes": 480
+        }
+      ],
+      "expect": {
+        "prep": 60,
+        "active": 30,
+        "passive": 60,
+        "setting": 480,
+        "bake": 90,
+        "oven": 60,
+        "unclassified": 0,
+        "classified": true,
+        "after": 0
+      }
+    },
+    {
+      "name": "a passive step off the oven still counts in the bake, not in the oven",
+      "steps": [
+        {
+          "text": "Mix",
+          "kind": "active",
+          "minutes": 10
+        },
+        {
+          "text": "Rest the batter",
+          "kind": "passive",
+          "minutes": 30
+        },
+        {
+          "text": "Bake",
+          "kind": "passive",
+          "minutes": 45,
+          "oven": true
+        },
+        {
+          "text": "Cool in the switched-off oven",
+          "kind": "passive",
+          "minutes": 60,
+          "oven": true
+        }
+      ],
+      "expect": {
+        "prep": 0,
+        "active": 10,
+        "passive": 135,
+        "setting": 0,
+        "bake": 145,
+        "oven": 105,
+        "unclassified": 0,
+        "classified": true,
+        "after": 0
+      }
+    },
+    {
+      "name": "some steps without a kind: not classified",
+      "steps": [
+        {
+          "text": "Mix",
+          "kind": "active",
+          "minutes": 10
+        },
+        {
+          "text": "Bake",
+          "minutes": 40,
+          "oven": true
+        }
+      ],
+      "expect": {
+        "prep": 0,
+        "active": 10,
+        "passive": 0,
+        "setting": 0,
+        "bake": 10,
+        "oven": 40,
+        "unclassified": 40,
+        "classified": false,
+        "after": 0
+      }
+    },
+    {
+      "name": "no steps",
+      "steps": [],
+      "expect": {
+        "prep": 0,
+        "active": 0,
+        "passive": 0,
+        "setting": 0,
+        "bake": 0,
+        "oven": 0,
+        "unclassified": 0,
+        "classified": false,
+        "after": 0
+      }
+    },
+    {
+      "name": "steps after the setting are the next day, not the bake",
+      "steps": [
+        {
+          "text": "Mix",
+          "kind": "active",
+          "minutes": 20
+        },
+        {
+          "text": "Bake",
+          "kind": "passive",
+          "minutes": 60,
+          "oven": true
+        },
+        {
+          "text": "Cool overnight",
+          "kind": "setting",
+          "minutes": 480
+        },
+        {
+          "text": "Wrap",
+          "kind": "active",
+          "minutes": 5
+        },
+        {
+          "text": "Rest wrapped",
+          "kind": "passive",
+          "minutes": 10
+        }
+      ],
+      "expect": {
+        "prep": 0,
+        "active": 25,
+        "passive": 70,
+        "setting": 480,
+        "bake": 80,
+        "oven": 60,
+        "unclassified": 0,
+        "classified": true,
+        "after": 15
+      }
+    }
+  ]
+}

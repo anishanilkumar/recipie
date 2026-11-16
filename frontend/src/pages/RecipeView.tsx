@@ -8,6 +8,7 @@ import { Qty } from "../components/Qty";
 import { StepIngredients } from "../components/StepIngredients";
 import { deleteLocal, markOpened, saveLocal } from "../db";
 import { clock, minutes } from "../format";
+import { stepChip, timingFacts } from "../timing";
 import { usePantry, useRecipe } from "../hooks";
 import { getRecipeShare, setRecipeShare, type RecipeShareState } from "../recipeShare";
 import { HttpError, syncNow, syncSoon } from "../sync";
@@ -88,6 +89,9 @@ export function RecipeView() {
         <p className="recipe-facts">
           {d.prep_minutes ? <span>Prep {minutes(d.prep_minutes)}</span> : null}
           {d.cook_minutes ? <span>Cook {minutes(d.cook_minutes)}</span> : null}
+          {timingFacts(d.steps).map((f) => (
+            <span key={f}>{f}</span>
+          ))}
           {(d.tags ?? []).map((t) => (
             <span key={t} className="tag">{t}</span>
           ))}
@@ -188,6 +192,7 @@ export function RecipeCols({ doc: d, stock, serves, onServes }: {
                 <p>{s.text}</p>
                 <StepIngredients step={s} ingredients={d.ingredients} factor={factor} />
                 {s.timer_seconds ? <span className="timer-chip">{clock(s.timer_seconds)}</span> : null}
+                {s.kind ? <span className={`kind-chip kind-${s.kind}`}>{stepChip(s)}</span> : null}
               </li>
             ))}
           </ol>

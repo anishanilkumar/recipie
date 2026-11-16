@@ -144,6 +144,21 @@ The link lives in its own table (`shares.py`), so it never bumps the recipe's
 rev. Claude can do the same with `share_recipe`, and Friday's Cook tab has the
 same Share key on a recipe.
 
+## Step kinds and timing
+
+Each step can say what it asks of the cook (`kind`): **prep** (done ahead,
+on its own: butter out to room temperature), **active** (hands on),
+**passive** (waiting while it happens: in the oven, resting) or **setting**
+(after it's done: overnight on the rack, in the fridge). `minutes` is how
+long a step takes when that isn't its timer (an active step's estimate, an
+overnight setting that shouldn't ring), and `oven` marks a step that
+occupies the oven. The recipe page and cook mode show each step's kind and
+the recipe's totals: start to finish (active and passive steps before the
+first setting), hands-on, oven, prep ahead, setting, and what comes after.
+The rules are in `backend/recipie/timing.py`, `frontend/src/timing.ts` and
+Friday's `cook/logic/Timing.kt`, all held to `shared/timing-cases.json`.
+Bake (`../bakes`) plans its nights from them; Friday's Cook edits them too.
+
 ## Events
 
 A menu cooked for other people, over one or more days, at `/events`. Each day

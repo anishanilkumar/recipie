@@ -33,6 +33,17 @@ brings it back, only when asked.
 When saving, structure it for cooking: one ingredient per line; steps short enough to read from across the counter; a timer_seconds on
 any step that waits ("simmer 20 minutes" -> 1200).
 
+Baking recipes (tagged "baking") are planned from their steps, so give each
+step a kind: prep (done ahead, waiting on its own: butter and eggs out to room
+temperature), active (hands on: mix, fold, fill the tins), passive (waiting
+while it happens: in the oven, resting), or setting (after it's done, before
+it can go: overnight on the rack, in the fridge). Set oven: true on every step
+that occupies the oven, including cooling in a switched-off oven. Give minutes
+where the length isn't a timer: an active step's honest estimate, or an
+overnight setting that shouldn't ring (cool overnight -> minutes 480, no
+timer). Other recipes may have kinds too; never invent them for a recipe you
+are only reading.
+
 Give every ingredient two measures, both shown in the app: its weight in grams
 as amount + unit "g", and the measure a cook would use in the kitchen as
 alt_amount + alt_unit: tsp, tbsp or cup for spices, pastes, oils and powders;

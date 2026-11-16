@@ -440,6 +440,11 @@ ul, ol { list-style: none; }
 .steps p { max-width: 64ch; }
 .timer-chip { display: inline-block; margin-top: 0.5rem; font-family: var(--face-mono); font-size: var(--t-label); color: var(--gold); }
 .timer-chip::before { content: "◷ "; }
+/* A step's kind: what it asks of the cook (timing.ts). */
+.kind-chip { display: inline-block; margin: 0.5rem 0 0 0.75rem; font-family: var(--face-mono); font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-dim); }
+.cook-step .kind-chip { margin-left: 0; }
+.kind-chip.kind-active { color: var(--arc); }
+.kind-chip.kind-passive { color: var(--gold); }
 .notes { white-space: pre-wrap; max-width: 64ch; color: var(--ink-dim); }
 .source { margin-top: 1rem; font-family: var(--face-mono); font-size: var(--t-min); color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; }
 .source a { color: var(--ink-dim); }
@@ -621,6 +626,9 @@ ul, ol { list-style: none; }
 
 .timer-field { display: flex; align-items: center; gap: 0.5rem; }
 .timer-field input { width: 6rem; }
+.step-times { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; }
+.oven-field { display: flex; align-items: center; gap: 0.5rem; font-family: var(--face-mono); font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-dim); }
+.step-kinds { margin-top: 0.5rem; }
 
 .step-uses { display: flex; flex-direction: column; gap: 0.375rem; }
 .step-uses-chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }

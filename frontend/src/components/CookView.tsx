@@ -5,6 +5,7 @@ import { startTimer, stopTimer, useTimers } from "../timers";
 import type { RecipeDoc } from "../types";
 import { Qty } from "./Qty";
 import { StepIngredients } from "./StepIngredients";
+import { stepChip } from "../timing";
 
 // One step at a time, big enough to read from across the counter. Used for a
 // recipe in the book (pages/Cook.tsx) and for a dish on a shared event menu,
@@ -79,6 +80,7 @@ export function CookView({ doc: d, factor, backTo }: { doc: RecipeDoc; factor: n
           </p>
           <p className={`cook-text cook-text-${textSize(step.text)}`}>{step.text}</p>
           <StepIngredients step={step} ingredients={d.ingredients} factor={factor} size="lg" />
+          {step.kind ? <p className={`kind-chip kind-${step.kind}`}>{stepChip(step)}</p> : null}
           {step.timer_seconds && !timers.some((t) => t.id === step.id) ? (
             <button className="btn btn-timer" onClick={() => startTimer(step.id, `Step ${index + 1}`, step.timer_seconds!)}>
               Start {clock(step.timer_seconds)} timer

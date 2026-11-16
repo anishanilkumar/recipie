@@ -9,6 +9,7 @@ import { tagTextHas, toggleTagText } from "../browse";
 import { syncSoon } from "../sync";
 import type { Ingredient, PantryProduct, RecipeDoc, Role, Step } from "../types";
 import { newId } from "../types";
+import { KINDS } from "../timing";
 
 const EMPTY: RecipeDoc = { title: "", ingredients: [], steps: [], tags: [] };
 
@@ -205,11 +206,32 @@ export function Edit() {
           <li key={s.id}>
             <textarea rows={3} aria-label={`Step ${i + 1}`} value={s.text} onChange={(e) => setStep(i, { text: e.target.value })} />
             <StepUses step={s} ingredients={doc.ingredients} onChange={(ids) => setStep(i, { ingredient_ids: ids })} />
-            <label className="timer-field">
-              <span>Timer, min</span>
-              <NumText value={s.timer_seconds ? s.timer_seconds / 60 : null}
-                onValue={(m) => setStep(i, { timer_seconds: m ? Math.round(m * 60) : null })} />
-            </label>
+            <div className="roles step-kinds" role="radiogroup" aria-label={`Step ${i + 1}: what it asks of you`}>
+              {KINDS.map((k) => (
+                <button type="button" key={k.value} role="radio" title={k.hint}
+                  aria-checked={s.kind === k.value}
+                  className={`role kind-${k.value}`}
+                  onClick={() => setStep(i, { kind: s.kind === k.value ? null : k.value })}>
+                  {k.label}
+                </button>
+              ))}
+            </div>
+            <div className="step-times">
+              <label className="timer-field">
+                <span>Timer, min</span>
+                <NumText value={s.timer_seconds ? s.timer_seconds / 60 : null}
+                  onValue={(m) => setStep(i, { timer_seconds: m ? Math.round(m * 60) : null })} />
+              </label>
+              <label className="timer-field" title="How long it takes when that isn't the timer: mixing, or cooling overnight">
+                <span>Takes, min</span>
+                <NumText value={s.minutes ?? null}
+                  onValue={(m) => setStep(i, { minutes: m ? Math.round(m) : null })} />
+              </label>
+              <label className="oven-field">
+                <input type="checkbox" checked={!!s.oven} onChange={(e) => setStep(i, { oven: e.target.checked })} />
+                <span>In the oven</span>
+              </label>
+            </div>
             <RowTools
               onUp={() => patch({ steps: move(doc.steps, i, -1) })}
               onDown={() => patch({ steps: move(doc.steps, i, 1) })}
