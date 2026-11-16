@@ -57,23 +57,118 @@ export function photoUrl(recipeId: string, kind: Kind, slot: PhotoSlot, size: "f
   return `/api/photos/${encodeURIComponent(recipeId)}/${kind}/${size}?v=${slot.v}`;
 }
 
-// --- changing them: online only, like a share link -------------------------------
+// --- the web stand-in: the search runs here, not on the server -----------------
+//
+// Openverse sits behind a Cloudflare check that turns away data centres, the
+// server included, so the app asks it directly (as openverse.org itself does)
+// and sends the chosen picture's thumbnail and Openverse's record of it.
+// The server makes the credit from that record (photos.py, credit_from).
+
+const OPENVERSE = "https://api.openverse.org/v1";
+
+/** Openverse's record of a picture, as its API sends it. */
+export interface OpenverseRecord {
+  id: string;
+  title?: string;
+  creator?: string;
+  creator_url?: string;
+  license?: string;
+  license_version?: string;
+  license_url?: string;
+  foreign_landing_url?: string;
+  source?: string;
+  thumbnail?: string;
+}
 
 export interface Candidate {
   id: string;
   thumb: string;
-  width: number | null;
-  height: number | null;
-  credit: Credit;
+  record: OpenverseRecord;
+  /** "s4's world", for the grid. */
+  creator: string;
+  /** "CC BY-NC-ND 2.0". */
+  licence: string;
 }
 
-export const searchPhotos = (recipeId: string, q = "") =>
-  api<{ query: string; results: Candidate[] }>(
-    `/api/recipes/${encodeURIComponent(recipeId)}/photo/search${q ? `?q=${encodeURIComponent(q)}` : ""}`,
-  );
+export class SearchError extends Error {}
 
-export async function chooseWebPhoto(recipeId: string, id: string): Promise<void> {
-  await api(`/api/recipes/${encodeURIComponent(recipeId)}/photo/web`, { method: "POST", body: JSON.stringify({ id }) });
+/** Openverse's licence code as people write it: "by-nc-nd", "2.0" -> "CC BY-NC-ND 2.0". Mirrors photos.py. */
+export function licenceLabel(code = "", version = ""): string {
+  const c = code.toLowerCase();
+  if (c === "cc0") return "CC0";
+  if (c === "pdm" || c === "publicdomain") return "Public domain";
+  if (!c) return "";
+  return `CC ${c.toUpperCase()} ${version}`.trim();
+}
+
+const SKIP = new Set(["for", "with", "and", "the", "a", "of"]);
+
+/**
+ * What to search for a recipe's title, most specific first:
+ * "Kerala Egg Puffs (24)" -> ["kerala egg puffs", "egg puffs", "puffs"].
+ */
+export function searchTerms(title: string): string[] {
+  const t = title.toLowerCase().replace(/\(.*?\)/g, " ").replace(/[^\p{L}\p{N}\s'-]/gu, " ");
+  const words = t.split(/\s+/).filter((w) => w && !/^\d+$/.test(w) && !SKIP.has(w));
+  const terms = words.map((_, i) => words.slice(i).join(" "));
+  return terms.length ? terms.slice(0, 3) : [title.trim().toLowerCase()];
+}
+
+async function openverse(q: string): Promise<Candidate[]> {
+  let res: Response;
+  try {
+    res = await fetch(`${OPENVERSE}/images/?q=${encodeURIComponent(q)}&page_size=18&mature=false`, {
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+    });
+  } catch {
+    throw new SearchError("No connection. The picture search needs the internet.");
+  }
+  if (res.status === 429) throw new SearchError("The picture search is busy. Try again in a minute.");
+  if (!res.ok) throw new SearchError(`The picture search said ${res.status}.`);
+  const data = (await res.json()) as { results?: OpenverseRecord[] };
+  return (data.results ?? [])
+    .filter((r) => /^[0-9a-f-]{36}$/.test(r.id) && r.license)
+    .map((r) => ({
+      id: r.id,
+      thumb: `${OPENVERSE}/images/${r.id}/thumb/`,
+      record: r,
+      creator: r.creator ?? "",
+      licence: licenceLabel(r.license, r.license_version),
+    }));
+}
+
+/** The person's own words, or the title shortened until something turns up. */
+export async function searchPhotos(title: string, q = ""): Promise<{ query: string; results: Candidate[] }> {
+  if (q.trim()) return { query: q.trim(), results: await openverse(q.trim()) };
+  let last = { query: "", results: [] as Candidate[] };
+  for (const term of searchTerms(title)) {
+    last = { query: term, results: await openverse(term) };
+    if (last.results.length >= 4) break;
+  }
+  return last;
+}
+
+function base64(bytes: ArrayBuffer): string {
+  const b = new Uint8Array(bytes);
+  let s = "";
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+export async function chooseWebPhoto(recipeId: string, c: Candidate): Promise<void> {
+  let image: string;
+  try {
+    const res = await fetch(c.thumb, { credentials: "omit", referrerPolicy: "no-referrer" });
+    if (!res.ok) throw new SearchError(`That picture didn't download (${res.status}).`);
+    image = base64(await res.arrayBuffer());
+  } catch (e) {
+    throw e instanceof SearchError ? e : new SearchError("No connection. The picture didn't download.");
+  }
+  await api(`/api/recipes/${encodeURIComponent(recipeId)}/photo/web`, {
+    method: "POST",
+    body: JSON.stringify({ id: c.id, record: c.record, image }),
+  });
   await refreshPhotos();
 }
 

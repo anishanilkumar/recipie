@@ -8,6 +8,8 @@ reads with its own token (service.py).
 
 from __future__ import annotations
 
+import base64
+import binascii
 import logging
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, Response
@@ -323,34 +325,29 @@ def recipes_router() -> APIRouter:
             raise HTTPException(404, "No such photo.")
         return photos.of(recipe_id)
 
-    @r.get("/{recipe_id}/photo/search")
-    def search_photos(recipe_id: str, q: str = ""):
-        no_demo()
-        row = db.get(recipe_id)
-        if row is None or row["deleted"]:
-            raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
-        try:
-            return photos.search_for_recipe(row["doc"].get("title", ""), q or None)
-        except photos.Unavailable as e:
-            raise HTTPException(502, str(e) or "The image search didn't answer.")
-
     @r.post("/{recipe_id}/photo/web")
     def choose_web_photo(recipe_id: str, body: WebPhotoBody, user: str = Depends(require_user)):
+        """A stand-in the app found on Openverse: its record there, and its thumbnail (base64)."""
         no_demo()
         try:
-            return photos.set_web(recipe_id, body.id, user=user)
+            data = base64.b64decode(body.image, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(422, "The picture didn't come through.")
+        try:
+            return photos.set_web(recipe_id, body.id, body.record, data, user=user)
         except photos.NotFound:
-            raise HTTPException(404, "That recipe or picture isn't there any more.")
+            raise HTTPException(404, "This recipe hasn't reached the server yet. Try again once it has synced.")
         except ValueError as e:
             raise HTTPException(422, str(e))
-        except photos.Unavailable as e:
-            raise HTTPException(502, str(e) or "The image search didn't answer.")
 
     return r
 
 
 class WebPhotoBody(BaseModel):
     id: str = Field(min_length=1, max_length=64)
+    record: dict
+    # A thumbnail is ~50 KB; this leaves room and stays under nginx's 4 MB.
+    image: str = Field(min_length=1, max_length=3_000_000)
 
 
 def create_app() -> FastAPI:

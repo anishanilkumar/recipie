@@ -1,5 +1,7 @@
 """A recipe's photos: the plate photo, the web stand-in with its credit, and the listing."""
 
+import base64
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -25,21 +27,6 @@ def client():
 @pytest.fixture
 def recipe():
     return db.save({"title": "Kerala Egg Puffs (24)", "ingredients": [], "steps": []})
-
-
-@pytest.fixture
-def openverse(monkeypatch):
-    asked: list[str] = []
-
-    def get_json(url):
-        asked.append(url)
-        if "/images/?" in url:
-            return {"results": [OV_RESULT, {"id": "not-an-id"}]}
-        return OV_RESULT
-
-    monkeypatch.setattr(photos, "_get_json", get_json)
-    monkeypatch.setattr(photos, "_get_bytes", lambda url: WEBP)
-    return asked
 
 
 def test_plate_photo_is_stored_and_listed_without_touching_the_recipe(client, recipe):
@@ -74,26 +61,35 @@ def test_only_jpeg_and_only_for_a_recipe_on_the_server(client, recipe):
     assert client.put(f"/api/recipes/{recipe['id']}/photo?size=thumb", content=JPEG, headers=W).status_code == 422
 
 
-def test_search_shortens_the_title_and_drops_bad_ids(client, recipe, openverse):
-    res = client.get(f"/api/recipes/{recipe['id']}/photo/search").json()
-    assert [r["id"] for r in res["results"]] == [OV_ID]
-    assert res["results"][0]["credit"]["licence"] == "CC BY-NC-ND 2.0"
-    # Only one result each time, so it tried the shorter terms too.
-    assert [u.split("q=")[1].split("&")[0] for u in openverse] == ["kerala%20egg%20puffs", "egg%20puffs", "puffs"]
-    own = client.get(f"/api/recipes/{recipe['id']}/photo/search?q=egg%20puff").json()
-    assert own["query"] == "egg puff"
+def _pick(client, rid, record=OV_RESULT, image=WEBP):
+    return client.post(f"/api/recipes/{rid}/photo/web", headers=W,
+                       json={"id": record.get("id", OV_ID), "record": record, "image": base64.b64encode(image).decode()})
 
 
-def test_web_stand_in_keeps_the_credit_from_openverse(client, recipe, openverse):
+def test_web_stand_in_keeps_the_credit_from_openverses_record(client, recipe):
     rid = recipe["id"]
-    out = client.post(f"/api/recipes/{rid}/photo/web", json={"id": OV_ID}, headers=W).json()
+    out = _pick(client, rid).json()
     credit = out["web"]["credit"]
-    assert credit["creator"] == "Smaku" and credit["landing_url"].endswith("/1") and credit["via"] == "Openverse"
+    assert credit == {
+        "title": "Banana Bread", "creator": "Smaku", "creator_url": "https://www.flickr.com/photos/x",
+        "licence": "CC BY-NC-ND 2.0", "licence_url": "https://creativecommons.org/licenses/by-nc-nd/2.0/",
+        "landing_url": "https://www.flickr.com/photos/x/1", "source": "flickr", "via": "Openverse",
+    }
     assert client.get(f"/api/photos/{rid}/web/full").headers["content-type"] == "image/webp"
-    assert client.post(f"/api/recipes/{rid}/photo/web", json={"id": "../../etc"}, headers=W).status_code == 422
     # Both slots can be filled; removing one leaves the other.
     client.put(f"/api/recipes/{rid}/photo", content=JPEG, headers=W)
     assert set(client.delete(f"/api/recipes/{rid}/photo/own", headers=W).json()) == {"web"}
+
+
+def test_web_stand_in_is_checked(client, recipe):
+    rid = recipe["id"]
+    assert _pick(client, rid, {**OV_RESULT, "id": "../../etc"}).status_code == 422
+    assert _pick(client, rid, {**OV_RESULT, "license": ""}).status_code == 422  # no licence, no stand-in
+    assert _pick(client, rid, image=b"<html>").status_code == 422
+    # A link that isn't http(s) is dropped from the credit.
+    out = _pick(client, rid, {**OV_RESULT, "creator_url": "javascript:alert(1)"}).json()
+    assert out["web"]["credit"]["creator_url"] == ""
+    assert _pick(client, "nope").status_code == 404
 
 
 def test_deleted_recipes_drop_out_of_the_listing(client, recipe):
@@ -102,8 +98,6 @@ def test_deleted_recipes_drop_out_of_the_listing(client, recipe):
     assert client.get("/api/photos").json()["photos"] == {}
 
 
-def test_search_terms():
-    assert photos.search_terms("Thiruvananthapuram Inji Curry (for 50)") == [
-        "thiruvananthapuram inji curry", "inji curry", "curry"]
-    assert photos.search_terms("Rajma (30)") == ["rajma"]
+def test_licence_label():
     assert photos.licence_label("cc0") == "CC0"
+    assert photos.licence_label("by", "4.0") == "CC BY 4.0"

@@ -8,8 +8,12 @@ Two slots per recipe, shown in this order:
 - **web**: a stand-in until there is an own photo, picked from an image
   search. The search is Openverse (openly licensed images, mostly Flickr and
   Wikimedia Commons), and every pick keeps its credit: title, creator,
-  licence and where it came from. The credit is read from Openverse by the
-  server when the picture is chosen, never taken from the client.
+  licence and where it came from.
+
+  The apps ask Openverse themselves, from the phone or browser: Openverse sits
+  behind a Cloudflare check that turns away requests from data centres, this
+  server's included. The app sends the chosen picture's thumbnail and
+  Openverse's own record of it; the credit is made here from that record.
 
 Files live in settings().photo_dir as `<recipe>-<kind>-<size>`; the row says
 what type each is. A new photo gets a new `v`, which goes into its URL, so a
@@ -23,9 +27,6 @@ import json
 import os
 import re
 import time
-from urllib.parse import quote
-
-import httpx
 
 from .config import settings
 from .db import closing, connect, now_iso, write_tx
@@ -33,19 +34,12 @@ from .db import closing, connect, now_iso, write_tx
 KINDS = ("own", "web")
 SIZES = ("full", "thumb")
 MAX_BYTES = 4 * 1024 * 1024
-OPENVERSE = "https://api.openverse.org/v1"
-# Openverse asks API users to say who they are; this names the app, not the household.
-USER_AGENT = "Recipie/0.1 (self-hosted recipe book; +https://github.com/anishanilkumar/recipie)"
 _ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _OPENVERSE_ID = re.compile(r"^[0-9a-f-]{36}$")
 
 
 class NotFound(Exception):
     pass
-
-
-class Unavailable(Exception):
-    """The image search didn't answer, or sent something unusable."""
 
 
 # --- files --------------------------------------------------------------------
@@ -191,38 +185,6 @@ def remove(recipe_id: str, kind: str) -> None:
 
 # --- the web stand-in ---------------------------------------------------------
 
-def _client() -> httpx.Client:
-    return httpx.Client(timeout=15, headers={"User-Agent": USER_AGENT}, follow_redirects=True)
-
-
-def _get_json(url: str) -> dict:
-    try:
-        with _client() as c:
-            res = c.get(url)
-    except httpx.HTTPError as e:
-        raise Unavailable(str(e)) from e
-    if res.status_code == 404:
-        raise NotFound(url)
-    if res.status_code == 429:
-        raise Unavailable("The image search is busy. Try again in a minute.")
-    if res.status_code >= 400:
-        raise Unavailable(f"The image search said {res.status_code}.")
-    return res.json()
-
-
-def _get_bytes(url: str) -> bytes:
-    try:
-        with _client() as c:
-            res = c.get(url)
-    except httpx.HTTPError as e:
-        raise Unavailable(str(e)) from e
-    if res.status_code >= 400:
-        raise Unavailable(f"The picture didn't download ({res.status_code}).")
-    if len(res.content) > MAX_BYTES:
-        raise Unavailable("The picture is too large.")
-    return res.content
-
-
 def licence_label(license: str, version: str = "") -> str:
     """Openverse's licence code as people write it: "by-nc-nd", "2.0" -> "CC BY-NC-ND 2.0"."""
     code = (license or "").lower()
@@ -235,76 +197,45 @@ def licence_label(license: str, version: str = "") -> str:
     return f"CC {code.upper()} {version}".strip()
 
 
-def _credit(r: dict) -> dict:
+def _text(v, limit: int = 300) -> str:
+    return str(v or "")[:limit]
+
+
+def _link(v) -> str:
+    u = _text(v, 600)
+    return u if u.startswith("https://") or u.startswith("http://") else ""
+
+
+def credit_from(r: dict) -> dict:
+    """The credit, from Openverse's record of the picture (GET /v1/images/<id>/)."""
     return {
-        "title": r.get("title") or "",
-        "creator": r.get("creator") or "",
-        "creator_url": r.get("creator_url") or "",
-        "licence": licence_label(r.get("license", ""), r.get("license_version") or ""),
-        "licence_url": r.get("license_url") or "",
-        "landing_url": r.get("foreign_landing_url") or "",
-        "source": r.get("source") or "",
+        "title": _text(r.get("title")),
+        "creator": _text(r.get("creator")),
+        "creator_url": _link(r.get("creator_url")),
+        "licence": licence_label(_text(r.get("license"), 40), _text(r.get("license_version"), 10)),
+        "licence_url": _link(r.get("license_url")),
+        "landing_url": _link(r.get("foreign_landing_url")),
+        "source": _text(r.get("source"), 60),
         "via": "Openverse",
     }
 
 
-def search_terms(title: str) -> list[str]:
-    """What to search for a recipe's title, most specific first.
+def set_web(recipe_id: str, openverse_id: str, record: dict, data: bytes, *, user: str = "") -> dict:
+    """Use an Openverse picture as the recipe's stand-in.
 
-    "Kerala Egg Puffs (24)" -> ["kerala egg puffs", "egg puffs", "puffs"]: the
-    serving count goes, then words come off the front until something answers.
+    [record] is Openverse's own JSON for the picture, which the app read from
+    Openverse; [data] the picture's thumbnail. Its licence must be stated.
     """
-    t = re.sub(r"\(.*?\)", " ", title.lower())
-    t = re.sub(r"[^\w\s'-]", " ", t)
-    words = [w for w in t.split() if not w.isdigit() and w not in ("for", "with", "and", "the", "a", "of")]
-    terms = [" ".join(words[i:]) for i in range(len(words)) if len(words) - i >= 1]
-    return terms[:3] or [title.strip().lower()]
-
-
-def search(query: str, *, limit: int = 18) -> dict:
-    """Pictures for a query, with what the credit will say. Asks Openverse."""
-    q = query.strip()[:200]
-    if not q:
-        return {"query": q, "results": []}
-    data = _get_json(f"{OPENVERSE}/images/?q={quote(q)}&page_size={limit}&mature=false")
-    results = []
-    for r in data.get("results", []):
-        if not _OPENVERSE_ID.match(str(r.get("id", ""))):
-            continue
-        results.append({
-            "id": r["id"],
-            "thumb": f"{OPENVERSE}/images/{r['id']}/thumb/",
-            "width": r.get("width"),
-            "height": r.get("height"),
-            "credit": _credit(r),
-        })
-    return {"query": q, "results": results}
-
-
-def search_for_recipe(title: str, query: str | None = None) -> dict:
-    """The search for a recipe: the person's own words, or the title, shortened until it finds something."""
-    if query and query.strip():
-        return search(query)
-    last = {"query": "", "results": []}
-    for term in search_terms(title):
-        last = search(term)
-        if len(last["results"]) >= 4:
-            return last
-    return last
-
-
-def set_web(recipe_id: str, openverse_id: str, *, user: str = "") -> dict:
-    """Use an Openverse picture as the recipe's stand-in. The credit is read from Openverse here."""
-    if not _OPENVERSE_ID.match(openverse_id or ""):
+    if not _OPENVERSE_ID.match(openverse_id or "") or record.get("id") != openverse_id:
         raise ValueError("Not an Openverse picture.")
-    with closing(connect()) as conn:
-        _require_recipe(conn, recipe_id)
-    detail = _get_json(f"{OPENVERSE}/images/{openverse_id}/")
-    data = _get_bytes(f"{OPENVERSE}/images/{openverse_id}/thumb/")
+    credit = credit_from(record)
+    if not credit["licence"]:
+        raise ValueError("That picture doesn't say its licence.")
+    if len(data) > MAX_BYTES:
+        raise ValueError("The picture is too large.")
     mime = image_type(data)
     if mime is None:
-        raise Unavailable("That picture isn't a JPEG, PNG or WebP.")
-    credit = _credit(detail)
+        raise ValueError("That picture isn't a JPEG, PNG or WebP.")
     with write_tx() as conn:
         _require_recipe(conn, recipe_id)
         _drop(recipe_id, "web")

@@ -102,7 +102,7 @@ export function RecipeView() {
           {confirmDelete ? "Tap again to delete" : "Delete"}
         </button>
         {sharing ? <SharePanel recipeId={recipe.id} title={d.title} /> : null}
-        {photoOpen ? <PhotoPanel recipeId={recipe.id} photos={photos[recipe.id]} /> : null}
+        {photoOpen ? <PhotoPanel recipeId={recipe.id} title={d.title} photos={photos[recipe.id]} /> : null}
       </footer>
       </aside>
 

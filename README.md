@@ -67,9 +67,12 @@ the recipe row so a photo never bumps a rev:
 - **Web stand-in:** until there's an own photo. **Photo** on a recipe searches
   [Openverse](https://openverse.org) (openly licensed pictures, mostly Flickr
   and Wikimedia Commons), starting from the title and shortening it until
-  something turns up. The picked picture's credit (title, creator, licence,
-  source page) is read from Openverse by the server and shown, linked, under
-  the photo. Openverse's anonymous limit is 200 searches a day.
+  something turns up. The search runs on the phone or in the browser, not on
+  the server: Openverse is behind a Cloudflare check that turns away data
+  centres. The app sends the chosen thumbnail with Openverse's record of it,
+  and the server makes the credit (title, creator, licence, source page) from
+  that record; it's shown, linked, under the photo. Openverse's anonymous limit
+  is 200 searches a day per device.
 
 The own photo shows when there is one. A recipe with neither gets its first
 letter in the list. `/api/photos` (with every sync) says which exist; each

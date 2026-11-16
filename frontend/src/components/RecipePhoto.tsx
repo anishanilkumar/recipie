@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  chooseWebPhoto, photoUrl, removePhoto, searchPhotos, shown,
+  chooseWebPhoto, photoUrl, removePhoto, searchPhotos, SearchError, shown,
   type Candidate, type Credit, type RecipePhotos,
 } from "../photos";
 import { HttpError, syncNow } from "../sync";
@@ -58,7 +58,7 @@ export function CreditLine({ credit }: { credit?: Credit }) {
 }
 
 /** Find a stand-in, or take a photo away. Online only. */
-export function PhotoPanel({ recipeId, photos }: { recipeId: string; photos?: RecipePhotos }) {
+export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; title: string; photos?: RecipePhotos }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Candidate[] | null>(null);
   const [error, setError] = useState("");
@@ -69,7 +69,8 @@ export function PhotoPanel({ recipeId, photos }: { recipeId: string; photos?: Re
   useEffect(() => { panel.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, [results, error]);
 
   const fail = (e: unknown) => {
-    if (e instanceof HttpError) {
+    if (e instanceof SearchError) setError(e.message);
+    else if (e instanceof HttpError) {
       if (e.status === 401) setError("Signed out. Sign in and try again.");
       else setError(typeof e.detail === "string" ? e.detail : "The server wouldn't do that.");
     } else setError("No connection. Photos need the server; try again when you're online.");
@@ -79,9 +80,7 @@ export function PhotoPanel({ recipeId, photos }: { recipeId: string; photos?: Re
     setBusy("search");
     setError("");
     try {
-      // A recipe made a moment ago must reach the server before it can have a photo.
-      await syncNow();
-      const res = await searchPhotos(recipeId, q);
+      const res = await searchPhotos(title, q);
       setQuery(res.query);
       setResults(res.results);
     } catch (e) {
@@ -95,7 +94,9 @@ export function PhotoPanel({ recipeId, photos }: { recipeId: string; photos?: Re
     setBusy(c.id);
     setError("");
     try {
-      await chooseWebPhoto(recipeId, c.id);
+      // A recipe made a moment ago must reach the server before it can have a photo.
+      await syncNow();
+      await chooseWebPhoto(recipeId, c);
       setResults(null);
     } catch (e) {
       fail(e);
@@ -137,13 +138,13 @@ export function PhotoPanel({ recipeId, photos }: { recipeId: string; photos?: Re
             {results.filter((c) => !dead.has(c.id)).map((c) => (
               <li key={c.id}>
                 <button type="button" className="photo-pick" disabled={busy !== null} onClick={() => void choose(c)}
-                  aria-label={`Use “${c.credit.title || "this picture"}” by ${c.credit.creator || "unknown"}`}>
+                  aria-label={`Use “${c.record.title || "this picture"}” by ${c.creator || "unknown"}`}>
                   <img src={c.thumb} alt="" loading="lazy" referrerPolicy="no-referrer"
                     onError={() => setDead((d) => new Set(d).add(c.id))} />
                   {busy === c.id ? <span className="photo-pick-busy">Saving…</span> : null}
                 </button>
                 <p className="photo-pick-credit">
-                  {c.credit.creator || "Unknown"} · {c.credit.licence || "licence unknown"}
+                  {c.creator || "Unknown"} · {c.licence}
                 </p>
               </li>
             ))}
