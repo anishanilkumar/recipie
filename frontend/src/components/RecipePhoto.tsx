@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  chooseWebPhoto, photoUrl, removePhoto, searchPhotos, SearchError, shown,
+  chooseWebPhoto, photoUrl, removePhoto, searchPhotos, searchTerms, SearchError, shown,
   type Candidate, type Credit, type RecipePhotos,
 } from "../photos";
 import { HttpError, syncNow } from "../sync";
@@ -59,7 +59,8 @@ export function CreditLine({ credit }: { credit?: Credit }) {
 
 /** Find a stand-in, or take a photo away. Online only. */
 export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; title: string; photos?: RecipePhotos }) {
-  const [query, setQuery] = useState("");
+  // The search the title gives, shown in the box from the start.
+  const [query, setQuery] = useState(() => searchTerms(title)[0] ?? "");
   const [results, setResults] = useState<Candidate[] | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -76,6 +77,7 @@ export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; titl
     } else setError("No connection. Photos need the server; try again when you're online.");
   };
 
+  /** Typed words as they are; "" is the title's own search, shortened until something turns up. */
   const search = async (q: string) => {
     setBusy("search");
     setError("");
@@ -89,6 +91,9 @@ export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; titl
       setBusy(null);
     }
   };
+
+  // It opens searching already.
+  useEffect(() => { void search(""); }, [recipeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = async (c: Candidate) => {
     setBusy(c.id);
@@ -126,12 +131,13 @@ export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; titl
       </p>
       <form className="photo-search" onSubmit={(e) => { e.preventDefault(); void search(query); }}>
         <label className="visually-hidden" htmlFor="photo-q">Search pictures</label>
-        <input id="photo-q" type="search" placeholder="Search pictures (the title if empty)" value={query}
+        <input id="photo-q" type="search" enterKeyHint="search" placeholder="Search pictures" value={query}
           onChange={(e) => setQuery(e.target.value)} />
         <button className="btn btn-primary" disabled={busy !== null}>
-          {busy === "search" ? "Looking, can take a while…" : photos?.web ? "Find another stand-in" : "Find a stand-in"}
+          {busy === "search" ? "Looking…" : "Search"}
         </button>
       </form>
+      {busy === "search" && !results ? <p className="edit-help">Looking for “{query}”… this can take a few seconds.</p> : null}
       {results ? (
         results.length ? (
           <ul className="photo-grid">
@@ -143,9 +149,8 @@ export function PhotoPanel({ recipeId, title, photos }: { recipeId: string; titl
                     onError={() => setDead((d) => new Set(d).add(c.id))} />
                   {busy === c.id ? <span className="photo-pick-busy">Saving…</span> : null}
                 </button>
-                <p className="photo-pick-credit">
-                  {c.creator || "Unknown"} · {c.licence}
-                </p>
+                <p className="photo-pick-credit">{c.creator || "Unknown"}</p>
+                <p className="photo-pick-credit photo-pick-licence">{c.licence}</p>
               </li>
             ))}
           </ul>

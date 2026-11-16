@@ -1127,3 +1127,5 @@ ul, ol { list-style: none; }
   font-family: var(--face-mono); font-size: var(--t-min); color: var(--ink-dim);
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
 }
+.photo-pick-credit:first-of-type { color: var(--ink-dim); }
+.photo-pick-licence { margin-top: 0; }
