@@ -106,3 +106,14 @@ def test_old_single_id_documents_are_migrated_once(client):
     assert row["rev"] == 2 and row["updated_by"] == "migration"
     db.init()  # idempotent
     assert db.get("old")["rev"] == 2
+
+
+def test_prep_ahead_round_trips_and_is_optional(client):
+    doc = {**CURRY, "prep_ahead": {"note": "Marinate overnight", "hours_before": 8}}
+    r = client.post("/api/sync", json={"changes": [{"id": "p1", "base_rev": 0, "doc": doc}]}, headers=W)
+    assert r.json()["results"][0]["row"]["doc"]["prep_ahead"] == {"note": "Marinate overnight", "hours_before": 8}
+    r = client.post("/api/sync", json={"changes": [{"id": "p2", "base_rev": 0, "doc": CURRY}]}, headers=W)
+    assert r.json()["results"][0]["row"]["doc"]["prep_ahead"] is None
+    bad = {**CURRY, "prep_ahead": {"note": ""}}
+    r = client.post("/api/sync", json={"changes": [{"id": "p3", "base_rev": 0, "doc": bad}]}, headers=W)
+    assert r.json()["results"][0]["status"] == "invalid"

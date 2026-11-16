@@ -361,6 +361,9 @@ ul, ol { list-style: none; }
 }
 .tag { color: var(--arc-dim); }
 .tag::before { content: "#"; }
+/* Soak, thaw: said before "Start cooking", since it can't be done then. */
+.prep-ahead { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.5rem; }
+.field-row .field-grow { flex: 3; }
 
 .verdict {
   display: flex; align-items: center; gap: 1.25rem;

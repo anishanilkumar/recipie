@@ -73,6 +73,13 @@ export function RecipeView() {
 
       <Verdict verdict={verdict} />
 
+      {d.prep_ahead?.note ? (
+        <p className="prep-ahead">
+          <span className="label">Ahead</span> {d.prep_ahead.note}
+          {d.prep_ahead.hours_before ? <span className="stamp">, {d.prep_ahead.hours_before} h before</span> : null}
+        </p>
+      ) : null}
+
       <Link to={`/r/${recipe.id}/cook${serves && serves !== base ? `?serves=${serves}` : ""}`} className="btn btn-primary btn-cook">
         Start cooking
       </Link>

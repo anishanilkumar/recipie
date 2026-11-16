@@ -80,6 +80,13 @@ class Step(BaseModel):
     )
 
 
+class PrepAhead(BaseModel):
+    """Something to do well before cooking: soak, thaw, marinate overnight.
+    Mealplan reminds the evening before a day the recipe is planned."""
+    note: str = Field(min_length=1, max_length=200, description="e.g. 'Soak the chickpeas'")
+    hours_before: int | None = Field(default=None, ge=1, le=72, description="How long before cooking, e.g. 8")
+
+
 class RecipeDoc(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=2000)
@@ -91,6 +98,8 @@ class RecipeDoc(BaseModel):
     ingredients: list[Ingredient] = Field(default_factory=list, max_length=100)
     steps: list[Step] = Field(default_factory=list, max_length=100)
     notes: str = Field(default="", max_length=5000)
+    prep_ahead: PrepAhead | None = Field(
+        default=None, description="Only for a step that must happen hours before (soaking, thawing, overnight marinade)")
 
     @model_validator(mode="after")
     def _references(self):

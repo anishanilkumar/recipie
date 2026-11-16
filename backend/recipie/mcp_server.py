@@ -63,6 +63,11 @@ Leave salt, water and similar unlinked; unlinked minor ingredients are assumed
 to be in the kitchen. Always try to link main ingredients: an unlinked main
 ingredient leaves the badge grey ("can't tell").
 
+When a recipe needs something done hours before cooking (soak the chickpeas
+overnight, thaw the meat, marinate), set prep_ahead: a short note and
+hours_before. Mealplan reminds the evening before a day it's planned. Leave it
+empty for anything done while cooking.
+
 To change an existing recipe, get_recipe first and send the whole recipe back
 with your edits; save_recipe replaces it. Pass the rev you read as
 expected_rev so an edit made on the phone in the meantime is not overwritten.

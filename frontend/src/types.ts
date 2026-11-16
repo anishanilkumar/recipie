@@ -46,6 +46,8 @@ export interface RecipeDoc {
   ingredients: Ingredient[];
   steps: Step[];
   notes?: string;
+  /** Something to do well before cooking (soak, thaw); Mealplan reminds the evening before. */
+  prep_ahead?: { note: string; hours_before?: number | null } | null;
 }
 
 /** A recipe as stored in the browser. */

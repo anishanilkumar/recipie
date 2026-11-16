@@ -156,6 +156,11 @@ each one (introspection, as `recipie-web`), keeps the answer until the token
 expires, and lets in only the clients it names. The token opens only that
 GET: not `/api/sync`, not a write. Unconfigured, the endpoint answers 503.
 
+A recipe can say what to do hours before cooking (`prep_ahead`: "Soak the
+chickpeas", 8 hours): shown on the recipe page, edited in the editor (here
+and in Friday's Cook, which sends it back with every save), set by Claude.
+Mealplan reminds the evening before a day it's planned.
+
 Every save or delete also sends an empty `recipes.changed` over NATS (when
 `RECIPIE_NATS_URL` is set), so the copy is re-read at once rather than at
 Mealplan's next 10-minute look.

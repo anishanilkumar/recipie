@@ -109,6 +109,19 @@ export function Edit() {
         <NumberField label="Cook, min" value={doc.cook_minutes} onChange={(v) => patch({ cook_minutes: v })} />
       </div>
 
+      {/* Soak, thaw, marinate: Mealplan reminds the evening before. */}
+      <div className="field-row">
+        <label className="field field-grow">
+          <span>Prepare ahead</span>
+          <input value={doc.prep_ahead?.note ?? ""} placeholder="Soak the chickpeas"
+            onChange={(e) => patch({ prep_ahead: e.target.value ? { ...doc.prep_ahead, note: e.target.value } : null })} />
+        </label>
+        {doc.prep_ahead?.note ? (
+          <NumberField label="Hours before" value={doc.prep_ahead.hours_before}
+            onChange={(v) => patch({ prep_ahead: { note: doc.prep_ahead!.note, hours_before: v } })} />
+        ) : null}
+      </div>
+
       <label className="field">
         <span>Tags, separated by commas</span>
         <input value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="kerala, weeknight" />
