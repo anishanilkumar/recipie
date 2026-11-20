@@ -129,6 +129,17 @@ CREATE TABLE IF NOT EXISTS recipe_shares (
     created_at  TEXT NOT NULL
 );
 
+-- The whole book's share links, one per friend (books.py). Nothing in the
+-- recipes table points here, so making or stopping one never bumps a rev.
+CREATE TABLE IF NOT EXISTS book_shares (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    slug        TEXT NOT NULL UNIQUE,
+    enabled     INTEGER NOT NULL DEFAULT 1,
+    created_at  TEXT NOT NULL,
+    created_by  TEXT NOT NULL DEFAULT ''
+);
+
 -- Household settings shared by every device: the recipe categories (categories.py).
 CREATE TABLE IF NOT EXISTS household (
     key         TEXT PRIMARY KEY,

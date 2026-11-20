@@ -94,6 +94,7 @@ export function Home() {
         <h1 className="wordmark">Recipie</h1>
         <span className="topbar-end">
           <Link to="/events" className="pill">Events</Link>
+          {me?.demo ? null : <Link to="/share" className="pill">Share</Link>}
           <SyncPill />
         </span>
       </header>

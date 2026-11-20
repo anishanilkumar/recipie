@@ -119,8 +119,9 @@ Claude ── OAuth bearer ────────▶ │   save_recipe, whats_
 - **Browser login:** the backend is a confidential OIDC client and keeps
   sessions server-side (30 days, sliding). The PWA holds only an HttpOnly
   cookie, never a token. Writes need an `X-Recipie: 1` header (CSRF). The
-  exceptions to login are the share links: `/api/share/<slug>` (an event) and
-  `/api/recipe-share/<slug>` (one recipe, read only).
+  exceptions to login are the share links: `/api/share/<slug>` (an event),
+  `/api/recipe-share/<slug>` (one recipe, read only) and `/api/book/<slug>`
+  (the whole book, read only, with its photos).
   The Android app sends the same kind of session as a bearer token (see
   Android app).
 - **Claude login:** the MCP server is an OAuth 2.1 protected resource. It
@@ -143,6 +144,27 @@ link stops at once) and "Switch off" stops it; deleting the recipe does too.
 The link lives in its own table (`shares.py`), so it never bumps the recipe's
 rev. Claude can do the same with `share_recipe`, and Friday's Cook tab has the
 same Share key on a recipe.
+
+## Sharing the whole book
+
+**Share** at the top of the list opens `/share`: links to the whole book,
+one per friend. Type who it's for ("Rahul") and it makes
+`/b/<name>-<secret>`, e.g. `/b/rahul-k3m9x2pq7d` (a 10-character secret, longer
+than a recipe's, since it opens everything). It opens without a login and
+shows every recipe that isn't archived, A–Z, with its photo (own or
+stand-in, with the credit), a search, and the household's categories that
+have recipes in them; each recipe with its servings stepper and cook mode.
+No pantry, no lids, and the pantry links are left out. It is the book as it
+is now: new recipes and edits show at once, archiving or deleting one takes
+it off. Once opened, the page keeps a copy and opens again with no signal;
+photos come through the link (`/api/book/<slug>/photos/...`) and the
+service worker keeps them.
+
+Each link can be sent, copied, replaced ("New link": the old one stops at
+once), switched off and back on, or removed, without touching anyone
+else's. Links live in their own table (`books.py`). Claude can do the same
+with `share_book` and `list_book_links`, and Friday's Cook tab has the same
+Share page. Not in the demo.
 
 ## Step kinds and timing
 

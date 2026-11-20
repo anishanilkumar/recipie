@@ -1,8 +1,8 @@
 """The HTTP API the PWA talks to.
 
 Everything under /api needs a session, except the share links, where the link
-itself is the key: /api/share/<slug> (an event) and /api/recipe-share/<slug>
-(one recipe, read only), and /api/service/, where another household service
+itself is the key: /api/share/<slug> (an event), /api/recipe-share/<slug>
+(one recipe, read only) and /api/book/<slug> (the whole book, read only), and /api/service/, where another household service
 reads with its own token (service.py).
 """
 
@@ -15,7 +15,7 @@ import logging
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import auth_web, categories, db, events, pantry, photos, service, shares, shopping
+from . import auth_web, books, categories, db, events, pantry, photos, service, shares, shopping
 from .config import settings
 from .models import DishStatus, EventDoc, RecipeDoc
 
@@ -343,6 +343,59 @@ def recipes_router() -> APIRouter:
     return r
 
 
+# --- the whole book's share links (books.py) -----------------------------------
+
+class BookLinkNew(BaseModel):
+    name: str = Field(min_length=1, max_length=books.MAX_NAME)
+
+
+class BookLinkBody(BaseModel):
+    enabled: bool | None = None
+    rotate: bool = False
+    name: str | None = Field(default=None, min_length=1, max_length=books.MAX_NAME)
+
+
+def book_links_router() -> APIRouter:
+    r = APIRouter(prefix="/api/book-links", dependencies=[Depends(require_user)])
+
+    def no_demo():
+        if settings().demo:
+            raise HTTPException(403, "The book can't be shared from the demo.")
+
+    @r.get("")
+    def list_links():
+        return {"links": books.listing()}
+
+    @r.post("")
+    def create(body: BookLinkNew, user: str = Depends(require_user)):
+        no_demo()
+        try:
+            return books.create(body.name, user=user)
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+
+    @r.post("/{link_id}")
+    def update(link_id: str, body: BookLinkBody):
+        no_demo()
+        try:
+            return books.update(link_id, enabled=body.enabled, rotate=body.rotate, name=body.name)
+        except events.NotFound:
+            raise HTTPException(404, "No such link.")
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+
+    @r.delete("/{link_id}")
+    def remove(link_id: str):
+        no_demo()
+        try:
+            books.remove(link_id)
+        except events.NotFound:
+            raise HTTPException(404, "No such link.")
+        return {"ok": True}
+
+    return r
+
+
 class CategoriesBody(BaseModel):
     categories: list[str] = Field(max_length=50)
 
@@ -362,6 +415,7 @@ def create_app() -> FastAPI:
     app.include_router(events_router())
     app.include_router(share_router())
     app.include_router(recipes_router())
+    app.include_router(book_links_router())
 
     # No session: the link is the key, and all it does is read.
     @app.get("/api/recipe-share/{slug}")
@@ -370,6 +424,22 @@ def create_app() -> FastAPI:
         if row is None:
             raise HTTPException(404, "This link doesn't open anything. Ask for a new one.")
         return row
+
+    # The whole book: the link is the key, and all it does is read.
+    @app.get("/api/book/{slug}")
+    def shared_book(slug: str):
+        book = books.by_slug(slug)
+        if book is None:
+            raise HTTPException(404, "This link doesn't open anything. Ask for a new one.")
+        return book
+
+    @app.get("/api/book/{slug}/photos/{recipe_id}/{kind}/{size}")
+    def shared_book_photo(slug: str, recipe_id: str, kind: str, size: str):
+        found = books.photo(slug, recipe_id, kind, size)
+        if found is None:
+            raise HTTPException(404, "No photo.")
+        data, mime = found
+        return Response(data, media_type=mime, headers={"Cache-Control": "private, max-age=31536000, immutable"})
 
     @app.get("/api/health")
     def health():

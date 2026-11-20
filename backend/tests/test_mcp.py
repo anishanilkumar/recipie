@@ -118,3 +118,18 @@ def test_archived_recipes_leave_the_lists_until_asked():
     assert call("get_recipe", id_or_title=b["id"])["recipe"]["archived"] is True
     call("archive_recipe", id=b["id"], archived=False)
     assert len(call("list_recipes")) == 2 and a["id"]
+
+
+def test_share_book_makes_a_link_per_friend():
+    call("save_recipe", recipe=CURRY)
+    a = call("share_book", friend="Rahul")
+    assert a["enabled"] and "/b/rahul-" in a["url"]
+    b = call("share_book", friend="Priya")
+    assert a["url"] != b["url"]
+    assert [x["name"] for x in call("list_book_links")] == ["Rahul", "Priya"]
+    off = call("share_book", id=a["id"], enabled=False)
+    assert off["enabled"] is False
+    assert call("share_book", id=b["id"], remove=True) == {"id": b["id"], "removed": True}
+    assert [x["name"] for x in call("list_book_links")] == ["Rahul"]
+    with pytest.raises(Exception):
+        call("share_book")

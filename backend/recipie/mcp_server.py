@@ -12,7 +12,7 @@ import os
 
 from mcp.server.fastmcp import FastMCP
 
-from . import categories, cookable, db, events, pantry, shares
+from . import books, categories, cookable, db, events, pantry, shares
 from .models import EventDoc, RecipeDoc
 
 INSTRUCTIONS = """\
@@ -94,6 +94,11 @@ expected_rev so an edit made on the phone in the meantime is not overwritten.
 A recipe can be sent to someone outside the household with share_recipe: it
 gives a link that opens without a login, read only. Only when asked; a recipe
 has no link until then.
+
+The whole book can be shared with a friend with share_book: a link of their
+own, named for them, that opens every recipe that isn't archived (with
+photos), read only and without a login. Only when asked. list_book_links
+shows the links that exist.
 
 Events are menus cooked for other people, over one or more days, with a
 shopping list shared through a link that needs no login (the volunteers
@@ -255,6 +260,35 @@ def register(mcp: FastMCP) -> FastMCP:
             raise ValueError(f"No recipe has id {id!r}. Use the id from list_recipes.")
         s = shares.set_share(id, enabled=enabled, rotate=rotate)
         return {"id": id, "title": row["doc"]["title"], "share_enabled": s["enabled"], "share_url": s["url"]}
+
+    @mcp.tool()
+    def list_book_links() -> list[dict]:
+        """The links that share the whole book, one per friend: name, url, and
+        whether it's switched on."""
+        return [{k: x[k] for k in ("id", "name", "enabled", "url", "created_at")} for x in books.listing()]
+
+    @mcp.tool()
+    def share_book(friend: str = "", id: str = "", enabled: bool | None = None, rotate: bool = False,
+                   remove: bool = False) -> dict:
+        """Share the whole recipe book with someone outside the household: every
+        recipe that isn't archived, with photos, read only, no login, and later
+        additions and edits show on it. Each friend gets their own link.
+
+        With friend (and no id): make a new link for that person, named for
+        them. With id (from list_book_links): enabled=false switches it off,
+        true back on; rotate=true replaces it (the old link stops at once);
+        friend renames it;
+        remove=true deletes the link. Only when asked."""
+        if id:
+            if remove:
+                books.remove(id)
+                return {"id": id, "removed": True}
+            link = books.update(id, enabled=enabled, rotate=rotate, name=friend or None)
+        else:
+            if not friend.strip():
+                raise ValueError("Say who the link is for (friend), or pass the id of an existing link.")
+            link = books.create(friend, user="claude")
+        return {k: link[k] for k in ("id", "name", "enabled", "url")}
 
     @mcp.tool()
     def whats_cookable() -> dict:

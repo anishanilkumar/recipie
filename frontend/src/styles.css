@@ -990,6 +990,13 @@ ul, ol { list-style: none; }
 .share-panel-edit { display: flex; flex-direction: column; gap: 0.625rem; }
 .share-url { font-family: var(--face-mono); font-size: 0.875rem; overflow-wrap: anywhere; }
 .share-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* The Share page: one link to the whole book per friend. */
+/* Not the recipe panel's flex: 1 0 100%, which on a desktop's full-height
+   column took the whole screen and pushed the links out of sight. */
+.book-links-intro { flex: none; margin-bottom: 1rem; }
+.book-link { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.875rem 0; }
+.book-links-none { padding: 0.5rem 0; }
 .share-panel-edit .field-row { align-items: flex-end; }
 
 @media (min-width: 64rem) and (min-height: 40rem) {

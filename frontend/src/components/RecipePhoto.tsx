@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import {
   chooseWebPhoto, photoUrl, removePhoto, searchPhotos, searchTerms, SearchError, shown,
-  type Candidate, type Credit, type RecipePhotos,
+  type Candidate, type Credit, type Kind, type PhotoSlot, type RecipePhotos,
 } from "../photos";
 import { HttpError, syncNow } from "../sync";
 
+/** Where a photo is fetched from: the household's /api/photos, or a shared book's. */
+export type PhotoSrc = (recipeId: string, kind: Kind, slot: PhotoSlot, size?: "full" | "thumb") => string;
+
 /** The list's square: the recipe's photo, or its first letter engraved. */
-export function Thumb({ recipeId, title, photos }: { recipeId: string; title: string; photos?: RecipePhotos }) {
+export function Thumb({ recipeId, title, photos, src = photoUrl }: {
+  recipeId: string; title: string; photos?: RecipePhotos; src?: PhotoSrc;
+}) {
   const s = shown(photos);
   const [broken, setBroken] = useState(false);
   if (s && !broken) {
     return (
-      <img className="row-thumb" src={photoUrl(recipeId, s.kind, s.slot, "thumb")} alt="" loading="lazy"
+      <img className="row-thumb" src={src(recipeId, s.kind, s.slot, "thumb")} alt="" loading="lazy"
         onError={() => setBroken(true)} />
     );
   }
@@ -20,14 +25,16 @@ export function Thumb({ recipeId, title, photos }: { recipeId: string; title: st
 }
 
 /** The recipe page's photo, with whose it is. Nothing when there's none. */
-export function RecipePhoto({ recipeId, photos }: { recipeId: string; photos?: RecipePhotos }) {
+export function RecipePhoto({ recipeId, photos, src = photoUrl }: {
+  recipeId: string; photos?: RecipePhotos; src?: PhotoSrc;
+}) {
   const s = shown(photos);
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [s?.slot.v]);
   if (!s || broken) return null;
   return (
     <figure className="recipe-photo">
-      <img src={photoUrl(recipeId, s.kind, s.slot)} alt="" onError={() => setBroken(true)} />
+      <img src={src(recipeId, s.kind, s.slot)} alt="" onError={() => setBroken(true)} />
       <figcaption>
         {s.kind === "own" ? (
           <span>Cooked here, {new Date(s.slot.v).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</span>
